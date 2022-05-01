@@ -24,15 +24,16 @@ main(int /*argc*/, char** /*argv*/) {
   try {
     logger.logMessage(utils::Level::Notice, "Starting application");
 
-    pge::Viewport tViewport = pge::Viewport(olc::vf2d(-6.0f, -5.0f), olc::vf2d(20.0f, 15.0f));
-    pge::Viewport pViewport = pge::Viewport(olc::vf2d(10.0f, 50.0f), olc::vf2d(800.0f, 600.0f));
+    pge::Viewport tViewport = pge::Viewport(olc::vf2d(-1.0f, -1.0f), olc::vf2d(11.0f, 11.0f));
+    pge::Viewport pViewport = pge::Viewport(olc::vf2d(0.0f, 0.0f), olc::vf2d(768.0f, 768.0f));
 
     pge::CoordinateFrameShPtr cf = std::make_shared<pge::TopViewFrame>(
       tViewport,
       pViewport,
       olc::vi2d(64, 64)
     );
-    pge::AppDesc ad = pge::newDesc(olc::vi2d(800, 600), cf, "sudoku");
+    pge::AppDesc ad = pge::newDesc(olc::vi2d(768, 768), cf, "sudoku");
+    ad.fixedFrame = true;
     pge::App demo(ad);
 
     demo.Start();

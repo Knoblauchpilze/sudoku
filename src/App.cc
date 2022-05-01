@@ -1,6 +1,8 @@
 
 # include "App.hh"
 
+# include <core_utils/RNG.hh>
+
 namespace pge {
 
   App::App(const AppDesc& desc):
@@ -97,7 +99,7 @@ namespace pge {
     // Generate the game state.
     m_state = std::make_shared<GameState>(
       olc::vi2d(ScreenWidth(), ScreenHeight()),
-      Screen::Home
+      Screen::Game
     );
 
     m_menus = m_game->generateMenus(ScreenWidth(), ScreenHeight());
@@ -116,7 +118,7 @@ namespace pge {
   }
 
   void
-  App::drawDecal(const RenderDesc& /*res*/) {
+  App::drawDecal(const RenderDesc& res) {
     // Clear rendering target.
     SetPixelMode(olc::Pixel::ALPHA);
     Clear(olc::VERY_DARK_GREY);
@@ -126,6 +128,10 @@ namespace pge {
       SetPixelMode(olc::Pixel::NORMAL);
       return;
     }
+
+    // Draw the board
+    drawBoard(res);
+    drawNumbers(res);
 
     SetPixelMode(olc::Pixel::NORMAL);
   }
@@ -195,6 +201,60 @@ namespace pge {
     DrawString(olc::vi2d(0, h / 2 + 2 * dOffset), "Intra cell        : " + toString(it), olc::CYAN);
 
     SetPixelMode(olc::Pixel::NORMAL);
+  }
+
+  void
+  App::drawBoard(const RenderDesc& res) noexcept {
+    // Draw the outer border.
+    SpriteDesc sd = {};
+    sd.loc = pge::RelativePosition::Center;
+    sd.radius = 9.1f;
+
+    sd.x = 4.5f;
+    sd.y = 4.5f;
+
+    sd.sprite.tint = olc::BLACK;
+
+    drawRect(sd, res.cf);
+
+    // Draw the cells.
+    sd = {};
+    sd.loc = pge::RelativePosition::Center;
+    sd.radius = 8.9f;
+
+    sd.x = 4.5f;
+    sd.y = 4.5f;
+
+    sd.sprite.tint = olc::WHITE;
+
+    drawRect(sd, res.cf);
+
+    // Draw the horizontal borders.
+    olc::vf2d bigSz = olc::vf2d(9.1f, 0.1f) * res.cf.tileSize();
+    olc::vf2d smallSz = olc::vf2d(9.1f, 0.05f) * res.cf.tileSize();
+    for (unsigned y = 1u ; y < 9u ; ++y) {
+      olc::vf2d sz = (y % 3u != 0u ? smallSz : bigSz);
+
+      olc::vf2d p = res.cf.tileCoordsToPixels(0.45f, y + 0.5f, pge::RelativePosition::Center, 1.0f);
+
+      FillRectDecal(p, sz, olc::BLACK);
+    }
+
+    // Draw the vertical borders.
+    bigSz = olc::vf2d(0.1f, 9.1f) * res.cf.tileSize();
+    smallSz = olc::vf2d(0.05f, 9.1f) * res.cf.tileSize();
+    for (unsigned x = 1u ; x < 9u ; ++x) {
+      olc::vf2d sz = (x % 3u != 0u ? smallSz : bigSz);
+
+      olc::vf2d p = res.cf.tileCoordsToPixels(x + 0.5f, 0.45f, pge::RelativePosition::Center, 1.0f);
+
+      FillRectDecal(p, sz, olc::BLACK);
+    }
+  }
+
+  void
+  App::drawNumbers(const RenderDesc& /*res*/) noexcept {
+
   }
 
 }

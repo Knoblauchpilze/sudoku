@@ -114,6 +114,12 @@ namespace pge {
       drawRect(const SpriteDesc& t,
                const CoordinateFrame& cf);
 
+      void
+      drawBoard(const RenderDesc& res) noexcept;
+
+      void
+      drawNumbers(const RenderDesc& res) noexcept;
+
     private:
 
       /**
