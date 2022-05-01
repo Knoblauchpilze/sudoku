@@ -253,8 +253,25 @@ namespace pge {
   }
 
   void
-  App::drawNumbers(const RenderDesc& /*res*/) noexcept {
+  App::drawNumbers(const RenderDesc& res) noexcept {
+    float s = 2.2f;
+    olc::vf2d scale(s, s);
 
+    for (unsigned y = 0u ; y < 9u ; ++y) {
+      for (unsigned x = 0u ; x < 9u ; ++x) {
+        /// TODO: Replace with numbers.
+        std::string n = "N";
+
+        olc::vf2d p(x + 0.5f, y + 0.5f);
+        p = res.cf.tileCoordsToPixels(p.x, p.y, pge::RelativePosition::Center, 1.0f);
+
+        olc::vi2d sz = GetTextSize(n);
+        p -= sz * scale / 2.0f;
+        p += res.cf.tileSize() / 2.0f;
+
+        DrawStringDecal(p, n, olc::CYAN, scale);
+      }
+    }
   }
 
 }
