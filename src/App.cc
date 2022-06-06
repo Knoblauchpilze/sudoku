@@ -74,6 +74,7 @@ namespace pge {
   App::loadData() {
     // Create the game and its state.
     m_game = std::make_shared<Game>();
+    m_game->togglePause();
   }
 
   void
@@ -132,6 +133,7 @@ namespace pge {
     // Draw the board
     drawBoard(res);
     drawNumbers(res);
+    drawOverlays(res);
 
     SetPixelMode(olc::Pixel::NORMAL);
   }
@@ -271,6 +273,31 @@ namespace pge {
 
         DrawStringDecal(p, n, olc::CYAN, scale);
       }
+    }
+  }
+
+  void
+  App::drawOverlays(const RenderDesc& res) noexcept {
+    olc::vi2d mp = GetMousePos();
+    olc::vf2d it;
+    olc::vi2d mtp = res.cf.pixelCoordsToTiles(mp, &it);
+
+    // Draw an overlay on the active square if the mouse
+    // is within the board's boundaries.
+    SpriteDesc sd = {};
+    sd.loc = pge::RelativePosition::Center;
+    sd.radius = 1.0f;
+
+    sd.x = std::floor(mtp.x + it.x) + 0.5f;
+    sd.y = std::floor(mtp.y + it.y) + 0.5f;
+
+    if (sd.x >= 0.0f && sd.x <= 9.0f &&
+        sd.y >= 0.0f && sd.y <= 9.0f)
+    {
+      sd.sprite.tint = olc::COBALT_BLUE;
+      sd.sprite.tint.a = alpha::SemiOpaque;
+
+      drawRect(sd, res.cf);
     }
   }
 

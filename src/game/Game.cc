@@ -47,7 +47,7 @@ namespace pge {
       return true;
     }
 
-    log("Perform step method of the game", utils::Level::Info);
+    /// TODO: Handle step method of the game.
 
     updateUI();
 
@@ -80,7 +80,7 @@ namespace pge {
 
   void
   Game::updateUI() {
-    log("Perform update of UI menus", utils::Level::Info);
+    /// TODO: Handle update of UI.
   }
 
   bool

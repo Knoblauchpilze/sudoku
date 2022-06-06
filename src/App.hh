@@ -120,6 +120,9 @@ namespace pge {
       void
       drawNumbers(const RenderDesc& res) noexcept;
 
+      void
+      drawOverlays(const RenderDesc& res) noexcept;
+
     private:
 
       /**
