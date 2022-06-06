@@ -5,6 +5,7 @@
 # include <memory>
 # include <core_utils/CoreObject.hh>
 # include <core_utils/TimeUtils.hh>
+# include "Sudoku.hh"
 
 namespace pge {
 
@@ -109,6 +110,12 @@ namespace pge {
       void
       resume();
 
+      /**
+       * @brief - Reset the game to a new one.
+       */
+      void
+      reset();
+
     private:
 
       /**
@@ -183,6 +190,8 @@ namespace pge {
       /// @brief - Convenience structure allowing to regroup
       /// all info about the menu in a single struct.
       struct Menus {
+        // The menus holding the remaining digits count to find.
+        std::vector<MenuShPtr> digits;
       };
 
       /**
@@ -195,6 +204,11 @@ namespace pge {
        *          current state of the simulation.
        */
       Menus m_menus;
+
+      /**
+       * @brief - The board managed by this game.
+       */
+      sudoku::GameShPtr m_board;
   };
 
   using GameShPtr = std::shared_ptr<Game>;

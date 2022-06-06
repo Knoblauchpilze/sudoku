@@ -3,6 +3,62 @@
 # include <cxxabi.h>
 # include "Menu.hh"
 
+/// @brief - The height of the main menu.
+# define STATUS_MENU_HEIGHT 50
+
+namespace {
+
+  pge::MenuShPtr
+  generateMenu(const olc::vi2d& pos,
+               const olc::vi2d& size,
+               const std::string& text,
+               const std::string& name,
+               const olc::Pixel& color,
+               bool clickable = false,
+               bool selectable = false)
+  {
+    pge::menu::MenuContentDesc fd = pge::menu::newMenuContent(text, "", size);
+    fd.color = olc::BLACK;
+    fd.hColor = olc::GREY;
+    fd.align = pge::menu::Alignment::Center;
+
+    return std::make_shared<pge::Menu>(
+      pos,
+      size,
+      name,
+      pge::menu::newColoredBackground(color),
+      fd,
+      pge::menu::Layout::Horizontal,
+      clickable,
+      selectable
+    );
+  }
+
+  // pge::MenuShPtr
+  // generateMessageBoxMenu(const olc::vi2d& pos,
+  //                        const olc::vi2d& size,
+  //                        const std::string& text,
+  //                        const std::string& name,
+  //                        bool alert)
+  // {
+  //   pge::menu::MenuContentDesc fd = pge::menu::newMenuContent(text, "", size);
+  //   fd.color = (alert ? olc::RED : olc::GREEN);
+  //   fd.align = pge::menu::Alignment::Center;
+
+  //   return std::make_shared<pge::Menu>(
+  //     pos,
+  //     size,
+  //     name,
+  //     pge::menu::newColoredBackground(alert ? olc::VERY_DARK_RED : olc::VERY_DARK_GREEN),
+  //     fd,
+  //     pge::menu::Layout::Horizontal,
+  //     false,
+  //     false
+  //   );
+  // }
+
+}
+
 namespace pge {
 
   Game::Game():
@@ -16,7 +72,10 @@ namespace pge {
       }
     ),
 
-    m_menus()
+    m_menus(),
+
+    /// TODO: Handle game difficulty.
+    m_board(std::make_shared<sudoku::Game>(sudoku::Level::Medium))
   {
     setService("game");
   }
@@ -24,11 +83,56 @@ namespace pge {
   Game::~Game() {}
 
   std::vector<MenuShPtr>
-  Game::generateMenus(float /*width*/,
+  Game::generateMenus(float width,
                       float /*height*/)
   {
-    log("Generate UI menus here", utils::Level::Info);
-    return std::vector<MenuShPtr>();
+    olc::Pixel bg(250, 248, 239);
+    olc::Pixel buttonBG(185, 172, 159);
+
+    // Generate the status menu.
+    MenuShPtr status = generateMenu(olc::vi2d(), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "status", bg);
+
+    olc::vi2d pos;
+    olc::vi2d dims(50, STATUS_MENU_HEIGHT);
+    MenuShPtr mLabel = generateMenu(pos, dims, "Cell(s):", "cells_label", buttonBG);
+    // m_menus.moves = generateMenu(pos, dims, "0", "moves", buttonBG);
+
+    // The list of remaining numbers
+    m_menus.digits.resize(9u);
+
+    m_menus.digits[0u] = generateMenu(pos, dims, "1s: 9", "ones", buttonBG);
+    status->addMenu(m_menus.digits[0u]);
+    m_menus.digits[1u] = generateMenu(pos, dims, "2s: 9", "twos", buttonBG);
+    status->addMenu(m_menus.digits[1u]);
+    m_menus.digits[2u] = generateMenu(pos, dims, "3s: 9", "threes", buttonBG);
+    status->addMenu(m_menus.digits[2u]);
+    m_menus.digits[3u] = generateMenu(pos, dims, "4s: 9", "fours", buttonBG);
+    status->addMenu(m_menus.digits[3u]);
+    m_menus.digits[4u] = generateMenu(pos, dims, "5s: 9", "fives", buttonBG);
+    status->addMenu(m_menus.digits[4u]);
+    m_menus.digits[5u] = generateMenu(pos, dims, "6s: 9", "sixes", buttonBG);
+    status->addMenu(m_menus.digits[5u]);
+    m_menus.digits[6u] = generateMenu(pos, dims, "7s: 9", "sevens", buttonBG);
+    status->addMenu(m_menus.digits[6u]);
+    m_menus.digits[7u] = generateMenu(pos, dims, "8s: 9", "eights", buttonBG);
+    status->addMenu(m_menus.digits[7u]);
+    m_menus.digits[8u] = generateMenu(pos, dims, "9s: 9", "nines", buttonBG);
+    status->addMenu(m_menus.digits[8u]);
+
+    MenuShPtr reset = generateMenu(pos, dims, "Reset", "reset", buttonBG, true);
+    reset->setSimpleAction(
+      [](Game& g) {
+        g.reset();
+      }
+    );
+    status->addMenu(reset);
+
+    // Package menus for output.
+    std::vector<MenuShPtr> menus;
+
+    menus.push_back(status);
+
+    return menus;
   }
 
   void
@@ -67,6 +171,12 @@ namespace pge {
   }
 
   void
+  Game::reset() {
+    // Reset the sudoku game.
+    m_board->initialize();
+  }
+
+  void
   Game::enable(bool enable) {
     m_state.disabled = !enable;
 
@@ -80,7 +190,38 @@ namespace pge {
 
   void
   Game::updateUI() {
-    /// TODO: Handle update of UI.
+    // Update digits count.
+    const sudoku::Board& b = (*m_board)();
+
+    unsigned count[9u];
+    for (unsigned id = 0u ; id < 9u ; ++id) {
+      count[id] = 0u;
+
+      unsigned digit = id + 1u;
+
+      for (unsigned y = 0u ; y < b.h() ; ++y) {
+        for (unsigned x = 0u ; x < b.w() ; ++x) {
+          if (b.at(x, y) == digit) {
+            ++count[id];
+          }
+        }
+      }
+    }
+
+    menu::BackgroundDesc all = pge::menu::newColoredBackground(olc::PALE_GREEN);
+    menu::BackgroundDesc missing = pge::menu::newColoredBackground(olc::PALE_YELLOW);
+
+    for (unsigned id = 0u ; id < m_menus.digits.size() ; ++id) {
+      std::string txt = std::to_string(id + 1u) + "s: " + std::to_string(count[id]);
+      m_menus.digits[id]->setText(txt);
+
+      if (count[id] == 9u) {
+        m_menus.digits[id]->setBackground(all);
+      }
+      else {
+        m_menus.digits[id]->setBackground(missing);
+      }
+    }
   }
 
   bool
