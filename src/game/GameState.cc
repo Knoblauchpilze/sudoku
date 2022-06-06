@@ -70,6 +70,8 @@ namespace pge {
     m_screen(screen == Screen::Home ? Screen::Exit : Screen::Home),
 
     m_home(nullptr),
+    m_modeSelector(nullptr),
+    m_difficultySelector(nullptr),
     m_loadGame(nullptr),
     m_savedGames(10u, "data/saves", "ext"),
     m_gameOver(nullptr)
@@ -77,6 +79,8 @@ namespace pge {
     setService("chess");
 
     generateHomeScreen(dims);
+    generateModeSelectorScreen(dims);
+    generateDifficultySelectorScreen(dims);
     generateLoadGameScreen(dims);
     generateGameOverScreen(dims);
 
@@ -108,6 +112,8 @@ namespace pge {
 
     // Update screens' visibility.
     m_home->setVisible(m_screen == Screen::Home);
+    m_modeSelector->setVisible(m_screen == Screen::ModeSelector);
+    m_difficultySelector->setVisible(m_screen == Screen::DifficultySelector);
     m_loadGame->setVisible(m_screen == Screen::LoadGame);
     m_gameOver->setVisible(m_screen == Screen::GameOver);
   }
@@ -115,6 +121,8 @@ namespace pge {
   void
   GameState::render(olc::PixelGameEngine* pge) const {
     m_home->render(pge);
+    m_modeSelector->render(pge);
+    m_difficultySelector->render(pge);
     m_loadGame->render(pge);
     m_gameOver->render(pge);
   }
@@ -127,6 +135,14 @@ namespace pge {
 
     // Propagate the user input to each screen.
     menu::InputHandle cur = m_home->processUserInput(c, actions);
+    res.relevant = (res.relevant || cur.relevant);
+    res.selected = (res.selected || cur.selected);
+
+    cur = m_modeSelector->processUserInput(c, actions);
+    res.relevant = (res.relevant || cur.relevant);
+    res.selected = (res.selected || cur.selected);
+
+    cur = m_difficultySelector->processUserInput(c, actions);
     res.relevant = (res.relevant || cur.relevant);
     res.selected = (res.selected || cur.selected);
 
@@ -156,7 +172,7 @@ namespace pge {
     MenuShPtr m = generateScreenOption(dims, "New game", olc::VERY_DARK_PINK, "new_game", true);
     m->setSimpleAction(
       [this](Game& /*g*/) {
-        setScreen(Screen::Game);
+        setScreen(Screen::ModeSelector);
       }
     );
     m_home->addMenu(m);
@@ -179,6 +195,68 @@ namespace pge {
       }
     );
     m_home->addMenu(m);
+  }
+
+  void
+  GameState::generateModeSelectorScreen(const olc::vi2d& dims) {
+    // Generate the mode selection screen.
+    m_modeSelector = generateDefaultScreen(dims, olc::DARK_CYAN);
+
+    // Add each option to the screen.
+    MenuShPtr m = generateScreenOption(dims, "Solver", olc::VERY_DARK_CYAN, "solver", true);
+    m->setSimpleAction(
+      [this](Game& /*g*/) {
+        setScreen(Screen::Game);
+      }
+    );
+    m_modeSelector->addMenu(m);
+
+    m = generateScreenOption(dims, "Play", olc::VERY_DARK_CYAN, "play", true);
+    m->setSimpleAction(
+      [this](Game& /*g*/) {
+        setScreen(Screen::DifficultySelector);
+      }
+    );
+    m_modeSelector->addMenu(m);
+
+    m = generateScreenOption(dims, "Back to main screen", olc::VERY_DARK_ORANGE, "back_to_main", true);
+    m->setSimpleAction(
+      [this](Game& /*g*/) {
+        setScreen(Screen::Home);
+      }
+    );
+    m_modeSelector->addMenu(m);
+  }
+
+  void
+  GameState::generateDifficultySelectorScreen(const olc::vi2d& dims) {
+    // Generate the mode selection screen.
+    m_difficultySelector = generateDefaultScreen(dims, olc::DARK_CYAN);
+
+    // Add each option to the screen.
+    MenuShPtr m = generateScreenOption(dims, "Easy", olc::VERY_DARK_CYAN, "easy", true);
+    m->setSimpleAction(
+      [this](Game& /*g*/) {
+        setScreen(Screen::Game);
+      }
+    );
+    m_difficultySelector->addMenu(m);
+
+    m = generateScreenOption(dims, "Medium", olc::VERY_DARK_CYAN, "medium", true);
+    m->setSimpleAction(
+      [this](Game& /*g*/) {
+        setScreen(Screen::Game);
+      }
+    );
+    m_difficultySelector->addMenu(m);
+
+    m = generateScreenOption(dims, "Hard", olc::VERY_DARK_CYAN, "hard", true);
+    m->setSimpleAction(
+      [this](Game& /*g*/) {
+        setScreen(Screen::Game);
+      }
+    );
+    m_difficultySelector->addMenu(m);
   }
 
   void
@@ -218,7 +296,7 @@ namespace pge {
     m = generateScreenOption(dims, "Restart", olc::VERY_DARK_MAGENTA, "restart", true);
     m->setSimpleAction(
       [this](Game& /*g*/) {
-        setScreen(Screen::Game);
+        setScreen(Screen::DifficultySelector);
       }
     );
     m_gameOver->addMenu(m);
