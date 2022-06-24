@@ -6,6 +6,9 @@
 /// @brief - The height of the main menu.
 # define STATUS_MENU_HEIGHT 50
 
+/// @brief - The delay in milliseconds to display a hint.
+# define HINT_DISPLAY_DELAY_MS 500
+
 namespace {
 
   pge::MenuShPtr
@@ -75,7 +78,8 @@ namespace pge {
     m_menus(),
 
     /// TODO: Handle game difficulty.
-    m_board(std::make_shared<sudoku::Game>(sudoku::Level::Medium))
+    m_board(std::make_shared<sudoku::Game>(sudoku::Level::Medium)),
+    m_hint({-1, -1, utils::TimeStamp(), false, std::vector<MenuShPtr>()})
   {
     setService("game");
   }
@@ -84,7 +88,7 @@ namespace pge {
 
   std::vector<MenuShPtr>
   Game::generateMenus(float width,
-                      float /*height*/)
+                      float height)
   {
     olc::Pixel bg(250, 248, 239);
     olc::Pixel buttonBG(185, 172, 159);
@@ -127,10 +131,22 @@ namespace pge {
     );
     status->addMenu(reset);
 
+    MenuShPtr hint = generateMenu(olc::vi2d(0, height - STATUS_MENU_HEIGHT), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "hint", bg);
+
+    dims = olc::vi2d(50, STATUS_MENU_HEIGHT);
+    for (unsigned id = 0u ; id < 9u ; ++id) {
+      std::string str = std::to_string(id);
+      MenuShPtr d = generateMenu(pos, dims, str, "digit" + str, buttonBG);
+      d->setEnabled(false);
+      m_hint.menus.push_back(d);
+      hint->addMenu(d);
+    }
+
     // Package menus for output.
     std::vector<MenuShPtr> menus;
 
     menus.push_back(status);
+    menus.push_back(hint);
 
     return menus;
   }
@@ -151,8 +167,12 @@ namespace pge {
       return true;
     }
 
-    /// TODO: Handle step method of the game.
+    utils::Duration elapsed = utils::now() - m_hint.since;
+    if (m_hint.x >= 0 && m_hint.y >= 0 && elapsed >= utils::toMilliseconds(HINT_DISPLAY_DELAY_MS)) {
+      m_hint.active = true;
+    }
 
+    /// TODO: Handle step method of the game.
     updateUI();
 
     return true;
@@ -174,6 +194,38 @@ namespace pge {
   Game::reset() {
     // Reset the sudoku game.
     m_board->initialize();
+  }
+
+  void
+  Game::setActiveCell(float x, float y) {
+    // Do nothing in case the game is already running.
+    if (m_state.paused) {
+      return;
+    }
+
+    int ix = static_cast<int>(x);
+    int iy = static_cast<int>(y);
+
+    if (ix == m_hint.x && iy == m_hint.y) {
+      return;
+    }
+
+    m_hint.x = ix;
+    m_hint.y = iy;
+
+    m_hint.since = utils::now();
+
+    m_hint.active = false;
+  }
+
+  void
+  Game::resetActiveCell() {
+    m_hint.x = -1;
+    m_hint.y = -1;
+
+    m_hint.since = utils::now();
+
+    m_hint.active = false;
   }
 
   void
@@ -220,6 +272,18 @@ namespace pge {
       }
       else {
         m_menus.digits[id]->setBackground(missing);
+      }
+    }
+
+    for (unsigned id = 0u ; id < m_hint.menus.size() ; ++id) {
+      Menu& m = *m_hint.menus[id];
+
+      if (!m_hint.active) {
+        m.setVisible(false);
+      }
+      else {
+        m.setVisible(true);
+        m.setEnabled(b.canFit(m_hint.x, m_hint.y, id));
       }
     }
   }

@@ -116,6 +116,18 @@ namespace pge {
       void
       reset();
 
+      /**
+       * @brief - Called to notify the current highlighted cell.
+       */
+      void
+      setActiveCell(float x, float y);
+
+      /**
+       * @brief - Reset the active cell.
+       */
+      void
+      resetActiveCell();
+
     private:
 
       /**
@@ -194,6 +206,25 @@ namespace pge {
         std::vector<MenuShPtr> digits;
       };
 
+      /// @brief - Convenience structure registering the properties
+      /// used for the display of hints.
+      struct HintData {
+        // The abscissa of the active cell.
+        int x;
+
+        // The ordinate of the active cell.
+        int y;
+
+        // Since when the cell is active.
+        utils::TimeStamp since;
+
+        // Whether or not the menu is allowed or not.
+        bool active;
+
+        // The menus representing the hints.
+        std::vector<MenuShPtr> menus;
+      };
+
       /**
        * @brief - The definition of the game state.
        */
@@ -209,6 +240,12 @@ namespace pge {
        * @brief - The board managed by this game.
        */
       sudoku::GameShPtr m_board;
+
+      /**
+       * @brief - The required data to maintain the active cell
+       *          and the hints.
+       */
+      HintData m_hint;
   };
 
   using GameShPtr = std::shared_ptr<Game>;

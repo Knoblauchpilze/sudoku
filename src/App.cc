@@ -297,7 +297,12 @@ namespace pge {
       sd.sprite.tint = olc::COBALT_BLUE;
       sd.sprite.tint.a = alpha::SemiOpaque;
 
+      m_game->setActiveCell(sd.x, sd.y);
+
       drawRect(sd, res.cf);
+    }
+    else {
+      m_game->resetActiveCell();
     }
   }
 

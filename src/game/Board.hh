@@ -50,6 +50,17 @@ namespace sudoku {
       at(unsigned x, unsigned y) const;
 
       /**
+       * @brief - Allow to determine whether or not the input number
+       *          can fit at the specified location.
+       * @param x - the input coordinate.
+       * @param y - the input coordinate.
+       * @param digit - the digit to check.
+       * @return - `true` if the input digit can fit.
+       */
+      bool
+      canFit(unsigned x, unsigned y, unsigned digit) const;
+
+      /**
        * @brief - Reset all tiles to be empty.
        */
       void

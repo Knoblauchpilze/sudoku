@@ -50,6 +50,19 @@ namespace sudoku {
     return m_board[linear(x, y)];
   }
 
+  bool
+  Board::canFit(unsigned x, unsigned y, unsigned digit) const {
+    if (x >= m_width || y >= m_height) {
+      error(
+        "Failed to fetch digit status",
+        "Invalid coordinate " + std::to_string(x) + "x" + std::to_string(y)
+      );
+    }
+
+    /// TODO: Handle this.
+    return digit % 2 == 0u;
+  }
+
   void
   Board::reset() noexcept {
     m_board = std::vector<unsigned>(w() * h(), 0u);
