@@ -196,6 +196,11 @@ namespace pge {
     m_board->initialize();
   }
 
+  const sudoku::Board&
+  Game::board() const noexcept {
+    return (*m_board)();
+  }
+
   void
   Game::setActiveCell(float x, float y) {
     // Do nothing in case the game is already running.

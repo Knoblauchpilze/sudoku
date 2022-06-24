@@ -117,6 +117,13 @@ namespace pge {
       reset();
 
       /**
+       * @brief - Returns the board attached to this game.
+       * @return - the board attached to this game.
+       */
+      const sudoku::Board&
+      board() const noexcept;
+
+      /**
        * @brief - Called to notify the current highlighted cell.
        */
       void

@@ -259,10 +259,17 @@ namespace pge {
     float s = 2.2f;
     olc::vf2d scale(s, s);
 
+    const sudoku::Board& b = m_game->board();
+
     for (unsigned y = 0u ; y < 9u ; ++y) {
       for (unsigned x = 0u ; x < 9u ; ++x) {
-        /// TODO: Replace with numbers.
-        std::string n = "N";
+        unsigned digit = b.at(x, y);
+
+        if (digit == 0u) {
+          continue;
+        }
+
+        std::string n = std::to_string(digit);
 
         olc::vf2d p(x + 0.5f, y + 0.5f);
         p = res.cf.tileCoordsToPixels(p.x, p.y, pge::RelativePosition::Center, 1.0f);
