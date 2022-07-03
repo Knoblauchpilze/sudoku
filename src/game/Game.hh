@@ -135,6 +135,14 @@ namespace pge {
       void
       resetActiveCell();
 
+      /**
+       * @brief - Used to notify that a digit has been pressed
+       *          by the user.
+       * @param digit - the value of the pressed digit.
+       */
+      void
+      onDigitPressed(unsigned digit);
+
     private:
 
       /**

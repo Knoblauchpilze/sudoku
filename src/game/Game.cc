@@ -234,6 +234,11 @@ namespace pge {
   }
 
   void
+  Game::onDigitPressed(unsigned digit) {
+    warn("Should handle digit " + std::to_string(digit));
+  }
+
+  void
   Game::enable(bool enable) {
     m_state.disabled = !enable;
 

@@ -68,6 +68,13 @@ namespace pge {
     if (c.keys[controls::keys::P]) {
       m_game->togglePause();
     }
+
+    for (unsigned id = 0u ; id < 10u ; ++id) {
+      controls::keys::Keys key = static_cast<controls::keys::Keys>(controls::keys::Zero + id);
+      if (c.keys[key]) {
+        m_game->onDigitPressed(id);
+      }
+    }
   }
 
   void

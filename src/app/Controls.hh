@@ -20,6 +20,17 @@ namespace pge {
 
         P,
 
+        Zero,
+        One,
+        Two,
+        Three,
+        Four,
+        Five,
+        Six,
+        Seven,
+        Eight,
+        Nine,
+
         KeysCount
       };
 

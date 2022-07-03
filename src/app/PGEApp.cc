@@ -199,6 +199,52 @@ namespace pge {
     b = GetKey(olc::P);
     m_controls.keys[controls::keys::P] = b.bReleased;
 
+    // Digits.
+    b = GetKey(olc::K0);
+    m_controls.keys[controls::keys::Zero] = b.bReleased;
+    b = GetKey(olc::K1);
+    m_controls.keys[controls::keys::One] = b.bReleased;
+    b = GetKey(olc::K2);
+    m_controls.keys[controls::keys::Two] = b.bReleased;
+    b = GetKey(olc::K3);
+    m_controls.keys[controls::keys::Three] = b.bReleased;
+    b = GetKey(olc::K4);
+    m_controls.keys[controls::keys::Four] = b.bReleased;
+    b = GetKey(olc::K5);
+    m_controls.keys[controls::keys::Five] = b.bReleased;
+    b = GetKey(olc::K6);
+    m_controls.keys[controls::keys::Six] = b.bReleased;
+    b = GetKey(olc::K7);
+    m_controls.keys[controls::keys::Seven] = b.bReleased;
+    b = GetKey(olc::K8);
+    m_controls.keys[controls::keys::Eight] = b.bReleased;
+    b = GetKey(olc::K9);
+    m_controls.keys[controls::keys::Nine] = b.bReleased;
+
+    // Numeric pad digits.
+    // See here: https://stackoverflow.com/questions/28882959/operator-on-stdvectorbool
+    // as to why we have to use the assignment operator.
+    b = GetKey(olc::NP0);
+    m_controls.keys[controls::keys::Zero] = m_controls.keys[controls::keys::Zero] | b.bReleased;
+    b = GetKey(olc::NP1);
+    m_controls.keys[controls::keys::One] = m_controls.keys[controls::keys::One] | b.bReleased;
+    b = GetKey(olc::NP2);
+    m_controls.keys[controls::keys::Two] = m_controls.keys[controls::keys::Two] | b.bReleased;
+    b = GetKey(olc::NP3);
+    m_controls.keys[controls::keys::Three] = m_controls.keys[controls::keys::Three] | b.bReleased;
+    b = GetKey(olc::NP4);
+    m_controls.keys[controls::keys::Four] = m_controls.keys[controls::keys::Four] | b.bReleased;
+    b = GetKey(olc::NP5);
+    m_controls.keys[controls::keys::Five] = m_controls.keys[controls::keys::Five] | b.bReleased;
+    b = GetKey(olc::NP6);
+    m_controls.keys[controls::keys::Six] = m_controls.keys[controls::keys::Six] | b.bReleased;
+    b = GetKey(olc::NP7);
+    m_controls.keys[controls::keys::Seven] = m_controls.keys[controls::keys::Seven] | b.bReleased;
+    b = GetKey(olc::NP8);
+    m_controls.keys[controls::keys::Eight] = m_controls.keys[controls::keys::Eight] | b.bReleased;
+    b = GetKey(olc::NP9);
+    m_controls.keys[controls::keys::Nine] = m_controls.keys[controls::keys::Nine] | b.bReleased;
+
     b = GetKey(olc::TAB),
     m_controls.tab = b.bReleased;
 
