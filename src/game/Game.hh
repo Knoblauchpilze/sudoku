@@ -143,6 +143,14 @@ namespace pge {
       void
       onDigitPressed(unsigned digit);
 
+      /**
+       * @brief - Defines a new difficulty level for the game.
+       *          This will reset the current grid.
+       * @param level - the new difficulty level.
+       */
+      void
+      setDifficultyLevel(const sudoku::Level& level);
+
     private:
 
       /**

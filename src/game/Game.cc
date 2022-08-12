@@ -60,6 +60,9 @@ namespace {
   //   );
   // }
 
+  const auto BUTTON_BG = olc::Pixel(185, 172, 159);
+  const auto DISABLED_BUTTON_BG = olc::Pixel(92, 86, 78);
+
 }
 
 namespace pge {
@@ -77,7 +80,6 @@ namespace pge {
 
     m_menus(),
 
-    /// TODO: Handle game difficulty.
     m_board(std::make_shared<sudoku::Game>(sudoku::Level::Medium)),
     m_hint({-1, -1, utils::TimeStamp(), false, std::vector<MenuShPtr>()})
   {
@@ -91,39 +93,37 @@ namespace pge {
                       float height)
   {
     olc::Pixel bg(250, 248, 239);
-    olc::Pixel buttonBG(185, 172, 159);
 
     // Generate the status menu.
     MenuShPtr status = generateMenu(olc::vi2d(), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "status", bg);
 
     olc::vi2d pos;
     olc::vi2d dims(50, STATUS_MENU_HEIGHT);
-    MenuShPtr mLabel = generateMenu(pos, dims, "Cell(s):", "cells_label", buttonBG);
-    // m_menus.moves = generateMenu(pos, dims, "0", "moves", buttonBG);
+    MenuShPtr mLabel = generateMenu(pos, dims, "Cell(s):", "cells_label", BUTTON_BG);
 
     // The list of remaining numbers
     m_menus.digits.resize(9u);
 
-    m_menus.digits[0u] = generateMenu(pos, dims, "1s: 9", "ones", buttonBG);
+    m_menus.digits[0u] = generateMenu(pos, dims, "1s: 9", "ones", BUTTON_BG);
     status->addMenu(m_menus.digits[0u]);
-    m_menus.digits[1u] = generateMenu(pos, dims, "2s: 9", "twos", buttonBG);
+    m_menus.digits[1u] = generateMenu(pos, dims, "2s: 9", "twos", BUTTON_BG);
     status->addMenu(m_menus.digits[1u]);
-    m_menus.digits[2u] = generateMenu(pos, dims, "3s: 9", "threes", buttonBG);
+    m_menus.digits[2u] = generateMenu(pos, dims, "3s: 9", "threes", BUTTON_BG);
     status->addMenu(m_menus.digits[2u]);
-    m_menus.digits[3u] = generateMenu(pos, dims, "4s: 9", "fours", buttonBG);
+    m_menus.digits[3u] = generateMenu(pos, dims, "4s: 9", "fours", BUTTON_BG);
     status->addMenu(m_menus.digits[3u]);
-    m_menus.digits[4u] = generateMenu(pos, dims, "5s: 9", "fives", buttonBG);
+    m_menus.digits[4u] = generateMenu(pos, dims, "5s: 9", "fives", BUTTON_BG);
     status->addMenu(m_menus.digits[4u]);
-    m_menus.digits[5u] = generateMenu(pos, dims, "6s: 9", "sixes", buttonBG);
+    m_menus.digits[5u] = generateMenu(pos, dims, "6s: 9", "sixes", BUTTON_BG);
     status->addMenu(m_menus.digits[5u]);
-    m_menus.digits[6u] = generateMenu(pos, dims, "7s: 9", "sevens", buttonBG);
+    m_menus.digits[6u] = generateMenu(pos, dims, "7s: 9", "sevens", BUTTON_BG);
     status->addMenu(m_menus.digits[6u]);
-    m_menus.digits[7u] = generateMenu(pos, dims, "8s: 9", "eights", buttonBG);
+    m_menus.digits[7u] = generateMenu(pos, dims, "8s: 9", "eights", BUTTON_BG);
     status->addMenu(m_menus.digits[7u]);
-    m_menus.digits[8u] = generateMenu(pos, dims, "9s: 9", "nines", buttonBG);
+    m_menus.digits[8u] = generateMenu(pos, dims, "9s: 9", "nines", BUTTON_BG);
     status->addMenu(m_menus.digits[8u]);
 
-    MenuShPtr reset = generateMenu(pos, dims, "Reset", "reset", buttonBG, true);
+    MenuShPtr reset = generateMenu(pos, dims, "Reset", "reset", BUTTON_BG, true);
     reset->setSimpleAction(
       [](Game& g) {
         g.reset();
@@ -136,7 +136,7 @@ namespace pge {
     dims = olc::vi2d(50, STATUS_MENU_HEIGHT);
     for (unsigned id = 0u ; id < 9u ; ++id) {
       std::string str = std::to_string(id);
-      MenuShPtr d = generateMenu(pos, dims, str, "digit" + str, buttonBG);
+      MenuShPtr d = generateMenu(pos, dims, str, "digit" + str, BUTTON_BG);
       d->setEnabled(false);
       m_hint.menus.push_back(d);
       hint->addMenu(d);
@@ -239,6 +239,11 @@ namespace pge {
   }
 
   void
+  Game::setDifficultyLevel(const sudoku::Level& level) {
+    m_board = std::make_shared<sudoku::Game>(level);
+  }
+
+  void
   Game::enable(bool enable) {
     m_state.disabled = !enable;
 
@@ -293,7 +298,10 @@ namespace pge {
       }
       else {
         m.setVisible(true);
-        m.setEnabled(b.canFit(m_hint.x, m_hint.y, id));
+
+        bool fit = b.canFit(m_hint.x, m_hint.y, id);
+        m.setEnabled(fit);
+        m.setBackground(menu::newColoredBackground(fit ? BUTTON_BG : DISABLED_BUTTON_BG));
       }
     }
   }
