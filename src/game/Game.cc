@@ -88,7 +88,14 @@ namespace pge {
     m_menus(),
 
     m_board(std::make_shared<sudoku::Game>(sudoku::Level::Medium)),
-    m_hint({-1, -1, utils::TimeStamp(), false, std::vector<MenuShPtr>()})
+    m_hint(HintData{
+      -1,                      // x
+      -1,                      // y
+      1u,                      // digit
+      utils::TimeStamp(),      // since
+      false,                   // active
+      std::vector<MenuShPtr>() // menus
+    })
   {
     setService("game");
   }
@@ -198,11 +205,58 @@ namespace pge {
   }
 
   void
-  Game::performAction(float /*x*/, float /*y*/) {
+  Game::performAction(float x, float y) {
     // Only handle actions when the game is not disabled.
     if (m_state.disabled) {
       log("Ignoring action while menu is disabled");
       return;
+    }
+
+    int ix = static_cast<int>(x);
+    int iy = static_cast<int>(y);
+
+    // Prevent invalid coordinates.
+    if (ix < 0 || iy < 0 || ix >= 9 || iy >= 9) {
+      return;
+    }
+
+    unsigned ux = static_cast<unsigned>(ix);
+    unsigned uy = static_cast<unsigned>(iy);
+
+    // Loop until we can put a valid number in the current
+    // cell of the board.
+    const sudoku::Board& b = (*m_board)();
+
+    unsigned tries = 0u;
+    bool put = false;
+    while (tries < 9u && !put) {
+      ++tries;
+
+      if (m_hint.digit == 10u) {
+        m_hint.digit = 0u;
+      }
+
+      if (b.at(ux, uy) == m_hint.digit) {
+        ++m_hint.digit;
+        continue;
+      }
+
+      if (!b.canFit(ux, uy, m_hint.digit)) {
+        ++m_hint.digit;
+        continue;
+      }
+
+      if (!m_board->put(ux, uy, m_hint.digit)) {
+        ++m_hint.digit;
+        continue;
+      }
+
+      log(
+        "Put " + std::to_string(m_hint.digit) + " at " +
+        std::to_string(ux) + "x" + std::to_string(uy)
+      );
+
+      put = true;
     }
   }
 
@@ -287,6 +341,10 @@ namespace pge {
     m_hint.x = ix;
     m_hint.y = iy;
 
+    const sudoku::Board& b = (*m_board)();
+    unsigned digit = b.at(ix, iy);
+    m_hint.digit = (digit != 0u ? digit : 1u);
+
     m_hint.since = utils::now();
 
     m_hint.active = false;
@@ -304,11 +362,26 @@ namespace pge {
 
   void
   Game::onDigitPressed(unsigned digit) {
-    warn("Should handle digit " + std::to_string(digit));
+    // Early return if the digit if the same.
+    const sudoku::Board& b = (*m_board)();
+    if (b.at(m_hint.x, m_hint.y) == digit) {
+      return;
+    }
 
-    // Reset the solver step.
-    if (m_state.mode == Mode::Solver) {
-      m_state.solverStep = SolverStep::Preparing;
+    if (!m_board->put(m_hint.x, m_hint.y, digit)) {
+      warn(
+        "Failed to put digit " + std::to_string(digit) +
+        " at " + std::to_string(m_hint.x) + "x" + std::to_string(m_hint.y)
+      );
+    }
+    else {
+      // Reset the solver step.
+      if (m_state.mode == Mode::Solver) {
+        m_state.solverStep = SolverStep::Preparing;
+      }
+
+      // And update the digit of the active cell.
+      m_hint.digit = digit;
     }
   }
 

@@ -70,4 +70,15 @@ namespace sudoku {
     m_board.save(file);
   }
 
+  bool
+  Game::put(unsigned x, unsigned y, unsigned digit) {
+    if (!m_board.canFit(x, y, digit)) {
+      return false;
+    }
+
+    m_board.put(x, y, digit);
+
+    return true;
+  }
+
 }

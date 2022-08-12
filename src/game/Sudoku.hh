@@ -76,6 +76,16 @@ namespace sudoku {
       void
       save(const std::string& file) const;
 
+      /**
+       * @brief - Attempt to put a number at a certain spot.
+       * @param x - one of the coordinate where to put the digit.
+       * @param y - one of the coordinate where to put the digit.
+       * @param digit - the digit to put.
+       * @return - `true` if the digit could be put.
+       */
+      bool
+      put(unsigned x, unsigned y, unsigned digit);
+
     private:
 
       /**

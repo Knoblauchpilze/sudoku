@@ -61,6 +61,15 @@ namespace sudoku {
       canFit(unsigned x, unsigned y, unsigned digit) const;
 
       /**
+       * @brief - Put a number at a certain spot.
+       * @param x - one of the coordinate where to put the digit.
+       * @param y - one of the coordinate where to put the digit.
+       * @param digit - the digit to put.
+       */
+      void
+      put(unsigned x, unsigned y, unsigned digit);
+
+      /**
        * @brief - Reset all tiles to be empty.
        */
       void

@@ -330,6 +330,9 @@ namespace pge {
         // The ordinate of the active cell.
         int y;
 
+        // The digit to put on a click: cycles from 1 to 9.
+        unsigned digit;
+
         // Since when the cell is active.
         utils::TimeStamp since;
 

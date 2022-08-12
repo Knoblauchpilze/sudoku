@@ -64,6 +64,24 @@ namespace sudoku {
   }
 
   void
+  Board::put(unsigned x, unsigned y, unsigned digit) {
+    if (x >= m_width || y >= m_height) {
+      error(
+        "Failed to put number on board",
+        "Invalid coordinate " + std::to_string(x) + "x" + std::to_string(y)
+      );
+    }
+    if (digit >= 9u) {
+      error(
+        "Failed to put number on board",
+        "Invalid digit " + std::to_string(digit) + " not in range [0; 9]"
+      );
+    }
+
+    m_board[linear(x, y)] = digit;
+  }
+
+  void
   Board::reset() noexcept {
     m_board = std::vector<unsigned>(w() * h(), 0u);
   }
