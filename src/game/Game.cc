@@ -72,9 +72,10 @@ namespace pge {
 
     m_state(
       State{
-        true,  // paused
-        true,  // disabled
-        false, // terminated
+        true,              // paused
+        true,              // disabled
+        false,             // terminated
+        Mode::Interactive, // mode
       }
     ),
 
@@ -95,7 +96,7 @@ namespace pge {
     olc::Pixel bg(250, 248, 239);
 
     // Generate the status menu.
-    MenuShPtr status = generateMenu(olc::vi2d(), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "status", bg);
+    m_menus.status = generateMenu(olc::vi2d(), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "status", bg);
 
     olc::vi2d pos;
     olc::vi2d dims(50, STATUS_MENU_HEIGHT);
@@ -105,23 +106,23 @@ namespace pge {
     m_menus.digits.resize(9u);
 
     m_menus.digits[0u] = generateMenu(pos, dims, "1s: 9", "ones", BUTTON_BG);
-    status->addMenu(m_menus.digits[0u]);
+    m_menus.status->addMenu(m_menus.digits[0u]);
     m_menus.digits[1u] = generateMenu(pos, dims, "2s: 9", "twos", BUTTON_BG);
-    status->addMenu(m_menus.digits[1u]);
+    m_menus.status->addMenu(m_menus.digits[1u]);
     m_menus.digits[2u] = generateMenu(pos, dims, "3s: 9", "threes", BUTTON_BG);
-    status->addMenu(m_menus.digits[2u]);
+    m_menus.status->addMenu(m_menus.digits[2u]);
     m_menus.digits[3u] = generateMenu(pos, dims, "4s: 9", "fours", BUTTON_BG);
-    status->addMenu(m_menus.digits[3u]);
+    m_menus.status->addMenu(m_menus.digits[3u]);
     m_menus.digits[4u] = generateMenu(pos, dims, "5s: 9", "fives", BUTTON_BG);
-    status->addMenu(m_menus.digits[4u]);
+    m_menus.status->addMenu(m_menus.digits[4u]);
     m_menus.digits[5u] = generateMenu(pos, dims, "6s: 9", "sixes", BUTTON_BG);
-    status->addMenu(m_menus.digits[5u]);
+    m_menus.status->addMenu(m_menus.digits[5u]);
     m_menus.digits[6u] = generateMenu(pos, dims, "7s: 9", "sevens", BUTTON_BG);
-    status->addMenu(m_menus.digits[6u]);
+    m_menus.status->addMenu(m_menus.digits[6u]);
     m_menus.digits[7u] = generateMenu(pos, dims, "8s: 9", "eights", BUTTON_BG);
-    status->addMenu(m_menus.digits[7u]);
+    m_menus.status->addMenu(m_menus.digits[7u]);
     m_menus.digits[8u] = generateMenu(pos, dims, "9s: 9", "nines", BUTTON_BG);
-    status->addMenu(m_menus.digits[8u]);
+    m_menus.status->addMenu(m_menus.digits[8u]);
 
     MenuShPtr reset = generateMenu(pos, dims, "Reset", "reset", BUTTON_BG, true);
     reset->setSimpleAction(
@@ -129,9 +130,11 @@ namespace pge {
         g.reset();
       }
     );
-    status->addMenu(reset);
+    m_menus.status->addMenu(reset);
 
-    MenuShPtr hint = generateMenu(olc::vi2d(0, height - STATUS_MENU_HEIGHT), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "hint", bg);
+    m_menus.solve = generateMenu(pos, olc::vi2d(width, STATUS_MENU_HEIGHT), "Solve !", "solve", olc::DARK_APPLE_GREEN, true);
+
+    m_menus.hint = generateMenu(olc::vi2d(0, height - STATUS_MENU_HEIGHT), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "hint", bg);
 
     dims = olc::vi2d(50, STATUS_MENU_HEIGHT);
     for (unsigned id = 0u ; id < 9u ; ++id) {
@@ -139,14 +142,15 @@ namespace pge {
       MenuShPtr d = generateMenu(pos, dims, str, "digit" + str, BUTTON_BG);
       d->setEnabled(false);
       m_hint.menus.push_back(d);
-      hint->addMenu(d);
+      m_menus.hint->addMenu(d);
     }
 
     // Package menus for output.
     std::vector<MenuShPtr> menus;
 
-    menus.push_back(status);
-    menus.push_back(hint);
+    menus.push_back(m_menus.status);
+    menus.push_back(m_menus.solve);
+    menus.push_back(m_menus.hint);
 
     return menus;
   }
@@ -191,6 +195,11 @@ namespace pge {
   }
 
   void
+  Game::setMode(const Mode& mode) noexcept {
+    m_state.mode = mode;
+  }
+
+  void
   Game::reset() {
     // Reset the sudoku game.
     m_board->initialize();
@@ -217,7 +226,6 @@ namespace pge {
     // Save the file including the number of moves and the score.
     m_board->save(file);
   }
-
 
   void
   Game::setActiveCell(float x, float y) {
@@ -275,6 +283,26 @@ namespace pge {
 
   void
   Game::updateUI() {
+    // Based on the mode, update one or the other menu.
+    m_menus.status->setVisible(m_state.mode == Mode::Interactive);
+    m_menus.hint->setVisible(m_state.mode == Mode::Interactive);
+    m_menus.solve->setVisible(m_state.mode == Mode::Solver);
+
+    switch (m_state.mode) {
+      case Mode::Interactive:
+        updateUIForInteractive();
+        break;
+      case Mode::Solver:
+        updateUIForSolver();
+        break;
+      default:
+        warn("Invalid game mode " + std::to_string(static_cast<int>(m_state.mode)));
+        break;
+    }
+  }
+
+  void
+  Game::updateUIForInteractive() {
     // Update digits count.
     const sudoku::Board& b = (*m_board)();
 
@@ -322,6 +350,11 @@ namespace pge {
         m.setBackground(menu::newColoredBackground(fit ? BUTTON_BG : DISABLED_BUTTON_BG));
       }
     }
+  }
+
+  void
+  Game::updateUIForSolver() {
+    // TODO: Handle this.
   }
 
   bool

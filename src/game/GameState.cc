@@ -218,6 +218,7 @@ namespace pge {
     m->setSimpleAction(
       [this](Game& g) {
         g.clear();
+        g.setMode(Mode::Solver);
         setScreen(Screen::Game);
       }
     );
@@ -225,7 +226,8 @@ namespace pge {
 
     m = generateScreenOption(dims, "Play", olc::VERY_DARK_CYAN, "play", true);
     m->setSimpleAction(
-      [this](Game& /*g*/) {
+      [this](Game& g) {
+        g.setMode(Mode::Interactive);
         setScreen(Screen::DifficultySelector);
       }
     );

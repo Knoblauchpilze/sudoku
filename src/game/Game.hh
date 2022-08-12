@@ -14,6 +14,13 @@ namespace pge {
   class Menu;
   using MenuShPtr = std::shared_ptr<Menu>;
 
+  /// @brief - The mode for the game: either solver or a
+  /// mode where the user can play.
+  enum class Mode {
+    Solver,
+    Interactive
+  };
+
   class Game: public utils::CoreObject {
     public:
 
@@ -111,6 +118,14 @@ namespace pge {
       resume();
 
       /**
+       * @brief - Set the current mode of the game. Will update
+       *          the UI based on the input value.
+       * @param mode - the new mode.
+       */
+      void
+      setMode(const Mode& mode) noexcept;
+
+      /**
        * @brief - Reset the game to a new one.
        */
       void
@@ -191,6 +206,22 @@ namespace pge {
       virtual void
       updateUI();
 
+      /**
+       * @brief - Used to update the UI in case of the interactive
+       *          mode. We assume that the visibility status is
+       *          already set.
+       */
+      void
+      updateUIForInteractive();
+
+      /**
+       * @brief - Used to update the UI in case of the solver mode.
+       *          We assume that the visibility status is already
+       *          set.
+       */
+      void
+      updateUIForSolver();
+
     private:
 
       /// @brief - Convenience structure allowing to group information
@@ -241,6 +272,9 @@ namespace pge {
         // be performed anymore and usually indicates that a
         // termination request has been received.
         bool terminated;
+
+        // The current mode attached to the game.
+        Mode mode;
       };
 
       /// @brief - Convenience structure allowing to regroup
@@ -248,6 +282,15 @@ namespace pge {
       struct Menus {
         // The menus holding the remaining digits count to find.
         std::vector<MenuShPtr> digits;
+
+        // The status menu for the digits to find.
+        MenuShPtr status;
+
+        // The hint menu for the hint available for a slot.
+        MenuShPtr hint;
+
+        // The solve button for the solver mode.
+        MenuShPtr solve;
       };
 
       /// @brief - Convenience structure registering the properties
