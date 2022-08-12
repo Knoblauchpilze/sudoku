@@ -170,7 +170,6 @@ namespace pge {
     log("Picked saved game \"" + game + "\"", utils::Level::Info);
 
     m_game.load(game);
-    m_game.togglePause();
     setScreen(Screen::Game);
   }
 
