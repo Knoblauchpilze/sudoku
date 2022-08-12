@@ -236,7 +236,8 @@ namespace pge {
     // Add each option to the screen.
     MenuShPtr m = generateScreenOption(dims, "Easy", olc::VERY_DARK_CYAN, "easy", true);
     m->setSimpleAction(
-      [this](Game& /*g*/) {
+      [this](Game& g) {
+        g.setDifficultyLevel(sudoku::Level::Easy);
         setScreen(Screen::Game);
       }
     );
@@ -244,7 +245,8 @@ namespace pge {
 
     m = generateScreenOption(dims, "Medium", olc::VERY_DARK_CYAN, "medium", true);
     m->setSimpleAction(
-      [this](Game& /*g*/) {
+      [this](Game& g) {
+        g.setDifficultyLevel(sudoku::Level::Medium);
         setScreen(Screen::Game);
       }
     );
@@ -252,7 +254,8 @@ namespace pge {
 
     m = generateScreenOption(dims, "Hard", olc::VERY_DARK_CYAN, "hard", true);
     m->setSimpleAction(
-      [this](Game& /*g*/) {
+      [this](Game& g) {
+        g.setDifficultyLevel(sudoku::Level::Hard);
         setScreen(Screen::Game);
       }
     );
