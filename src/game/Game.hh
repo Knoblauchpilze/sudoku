@@ -124,6 +124,21 @@ namespace pge {
       board() const noexcept;
 
       /**
+       * @brief - Loads the board defined in the input file.
+       * @param file - the file to use to load a board from.
+       */
+      void
+      load(const std::string& file);
+
+      /**
+       * @brief - Save the current state of the board to a default
+       *          file with the name provided in input.
+       * @param file - the file to save the board into.
+       */
+      void
+      save(const std::string& file) const;
+
+      /**
        * @brief - Called to notify the current highlighted cell.
        */
       void

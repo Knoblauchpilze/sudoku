@@ -68,6 +68,11 @@ namespace pge {
     if (c.keys[controls::keys::P]) {
       m_game->togglePause();
     }
+    if (c.keys[controls::keys::S]) {
+      if (m_state->getScreen() == Screen::Game) {
+        m_state->save();
+      }
+    }
 
     for (unsigned id = 0u ; id < 10u ; ++id) {
       controls::keys::Keys key = static_cast<controls::keys::Keys>(controls::keys::Zero + id);
@@ -107,7 +112,8 @@ namespace pge {
     // Generate the game state.
     m_state = std::make_shared<GameState>(
       olc::vi2d(ScreenWidth(), ScreenHeight()),
-      Screen::Game
+      Screen::Home,
+      *m_game
     );
 
     m_menus = m_game->generateMenus(ScreenWidth(), ScreenHeight());

@@ -202,6 +202,19 @@ namespace pge {
   }
 
   void
+  Game::load(const std::string& file) {
+    // Load the board.
+    m_board->load(file);
+  }
+
+  void
+  Game::save(const std::string& file) const {
+    // Save the file including the number of moves and the score.
+    m_board->save(file);
+  }
+
+
+  void
   Game::setActiveCell(float x, float y) {
     // Do nothing in case the game is already running.
     if (m_state.paused) {

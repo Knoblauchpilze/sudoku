@@ -19,6 +19,7 @@ namespace pge {
         Space,
 
         P,
+        S,
 
         Zero,
         One,

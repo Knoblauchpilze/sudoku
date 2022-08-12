@@ -61,7 +61,8 @@ namespace {
 namespace pge {
 
   GameState::GameState(const olc::vi2d& dims,
-                       const Screen& screen):
+                       const Screen& screen,
+                       Game& game):
     utils::CoreObject("state"),
 
     // Assign a different screen so that we can use the
@@ -74,7 +75,9 @@ namespace pge {
     m_difficultySelector(nullptr),
     m_loadGame(nullptr),
     m_savedGames(10u, "data/saves", "ext"),
-    m_gameOver(nullptr)
+    m_gameOver(nullptr),
+
+    m_game(game)
   {
     setService("chess");
 
@@ -158,8 +161,16 @@ namespace pge {
   }
 
   void
+  GameState::save() const {
+    m_game.save(m_savedGames.generateNewName());
+  }
+
+  void
   GameState::onSavedGamePicked(const std::string& game) {
     log("Picked saved game \"" + game + "\"", utils::Level::Info);
+
+    m_game.load(game);
+    m_game.togglePause();
     setScreen(Screen::Game);
   }
 
@@ -206,7 +217,7 @@ namespace pge {
     MenuShPtr m = generateScreenOption(dims, "Solver", olc::VERY_DARK_CYAN, "solver", true);
     m->setSimpleAction(
       [this](Game& /*g*/) {
-        setScreen(Screen::Game);
+        // TODO: Handle solver mode.
       }
     );
     m_modeSelector->addMenu(m);
