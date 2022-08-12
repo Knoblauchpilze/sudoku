@@ -9,6 +9,11 @@
 /// @brief - The delay in milliseconds to display a hint.
 # define HINT_DISPLAY_DELAY_MS 500
 
+/// @brief - The duration of the alert prompting that
+/// the player that the sudoku was solved or can't be
+/// solved.
+# define ALERT_DURATION_MS 3000
+
 namespace {
 
   pge::MenuShPtr
@@ -37,28 +42,28 @@ namespace {
     );
   }
 
-  // pge::MenuShPtr
-  // generateMessageBoxMenu(const olc::vi2d& pos,
-  //                        const olc::vi2d& size,
-  //                        const std::string& text,
-  //                        const std::string& name,
-  //                        bool alert)
-  // {
-  //   pge::menu::MenuContentDesc fd = pge::menu::newMenuContent(text, "", size);
-  //   fd.color = (alert ? olc::RED : olc::GREEN);
-  //   fd.align = pge::menu::Alignment::Center;
+  pge::MenuShPtr
+  generateMessageBoxMenu(const olc::vi2d& pos,
+                         const olc::vi2d& size,
+                         const std::string& text,
+                         const std::string& name,
+                         bool alert)
+  {
+    pge::menu::MenuContentDesc fd = pge::menu::newMenuContent(text, "", size);
+    fd.color = (alert ? olc::RED : olc::GREEN);
+    fd.align = pge::menu::Alignment::Center;
 
-  //   return std::make_shared<pge::Menu>(
-  //     pos,
-  //     size,
-  //     name,
-  //     pge::menu::newColoredBackground(alert ? olc::VERY_DARK_RED : olc::VERY_DARK_GREEN),
-  //     fd,
-  //     pge::menu::Layout::Horizontal,
-  //     false,
-  //     false
-  //   );
-  // }
+    return std::make_shared<pge::Menu>(
+      pos,
+      size,
+      name,
+      pge::menu::newColoredBackground(alert ? olc::VERY_DARK_RED : olc::VERY_DARK_GREEN),
+      fd,
+      pge::menu::Layout::Horizontal,
+      false,
+      false
+    );
+  }
 
   const auto BUTTON_BG = olc::Pixel(185, 172, 159);
   const auto DISABLED_BUTTON_BG = olc::Pixel(92, 86, 78);
@@ -76,6 +81,7 @@ namespace pge {
         true,              // disabled
         false,             // terminated
         Mode::Interactive, // mode
+        SolverStep::None,  // solverStep
       }
     ),
 
@@ -132,8 +138,6 @@ namespace pge {
     );
     m_menus.status->addMenu(reset);
 
-    m_menus.solve = generateMenu(pos, olc::vi2d(width, STATUS_MENU_HEIGHT), "Solve !", "solve", olc::DARK_APPLE_GREEN, true);
-
     m_menus.hint = generateMenu(olc::vi2d(0, height - STATUS_MENU_HEIGHT), olc::vi2d(width, STATUS_MENU_HEIGHT), "", "hint", bg);
 
     dims = olc::vi2d(50, STATUS_MENU_HEIGHT);
@@ -145,12 +149,50 @@ namespace pge {
       m_menus.hint->addMenu(d);
     }
 
+    // Generate the menus for the solver mode.
+    m_menus.solve = generateMenu(pos, olc::vi2d(width, STATUS_MENU_HEIGHT), "Solve !", "solve", olc::DARK_APPLE_GREEN, true);
+    m_menus.solve->setSimpleAction(
+      [](Game& g) {
+        g.solve();
+      }
+    );
+
+    m_menus.solvedAlert.date = utils::TimeStamp();
+    m_menus.solvedAlert.wasActive = false;
+    m_menus.solvedAlert.duration = ALERT_DURATION_MS;
+
+    m_menus.solvedAlert.menu = generateMessageBoxMenu(
+      olc::vi2d((width - 300.0f) / 2.0f, (height - 150.0f) / 2.0f),
+      olc::vi2d(300, 150),
+      "Solved !",
+      "solved_alert",
+      false
+    );
+    m_menus.solvedAlert.menu->setVisible(false);
+
+    m_menus.unsolvableAlert.date = utils::TimeStamp();
+    m_menus.unsolvableAlert.wasActive = false;
+    m_menus.unsolvableAlert.duration = ALERT_DURATION_MS;
+
+    m_menus.unsolvableAlert.menu = generateMessageBoxMenu(
+      olc::vi2d((width - 300.0f) / 2.0f, (height - 150.0f) / 2.0f),
+      olc::vi2d(300, 150),
+      "Unsolvable !",
+      "unsolvable_alert",
+      true
+    );
+    m_menus.unsolvableAlert.menu->setVisible(false);
+
     // Package menus for output.
     std::vector<MenuShPtr> menus;
 
     menus.push_back(m_menus.status);
     menus.push_back(m_menus.solve);
+
     menus.push_back(m_menus.hint);
+
+    menus.push_back(m_menus.solvedAlert.menu);
+    menus.push_back(m_menus.unsolvableAlert.menu);
 
     return menus;
   }
@@ -197,6 +239,7 @@ namespace pge {
   void
   Game::setMode(const Mode& mode) noexcept {
     m_state.mode = mode;
+    m_state.solverStep = (mode == Mode::Interactive ? SolverStep::None : SolverStep::Preparing);
   }
 
   void
@@ -262,11 +305,38 @@ namespace pge {
   void
   Game::onDigitPressed(unsigned digit) {
     warn("Should handle digit " + std::to_string(digit));
+
+    // Reset the solver step.
+    if (m_state.mode == Mode::Solver) {
+      m_state.solverStep = SolverStep::Preparing;
+    }
   }
 
   void
   Game::setDifficultyLevel(const sudoku::Level& level) {
     m_board = std::make_shared<sudoku::Game>(level);
+  }
+
+  void
+  Game::solve() {
+    // If we're in solving mode.
+    if (m_state.mode != Mode::Solver) {
+      warn("Ignoring solve request, not in solver mode");
+      return;
+    }
+
+    // The solver step should allow solving the sudoku.
+    if (m_state.solverStep == SolverStep::Solved) {
+      warn("Ignoring solve request, sudoku is already solved");
+      return;
+    }
+    if (m_state.solverStep == SolverStep::Unsolvable) {
+      warn("Ignoring solve request, sudoku can't be solved");
+      return;
+    }
+
+    warn("Should handle solving");
+    m_state.solverStep = SolverStep::Unsolvable;
   }
 
   void
@@ -354,7 +424,8 @@ namespace pge {
 
   void
   Game::updateUIForSolver() {
-    // TODO: Handle this.
+    m_menus.solvedAlert.update(m_state.solverStep == SolverStep::Solved);
+    m_menus.unsolvableAlert.update(m_state.solverStep == SolverStep::Unsolvable);
   }
 
   bool

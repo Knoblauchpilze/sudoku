@@ -187,6 +187,13 @@ namespace pge {
       void
       setDifficultyLevel(const sudoku::Level& level);
 
+      /**
+       * @brief - Attempts to solve the sudoku in its current
+       *          state.
+       */
+      void
+      solve();
+
     private:
 
       /**
@@ -251,6 +258,16 @@ namespace pge {
         update(bool active) noexcept;
       };
 
+      /// @brief - An enumeration allowing to determine whether the
+      /// player already requested the sudoku to be solved or not.
+      enum class SolverStep {
+        None,
+        Preparing,
+        Solving,
+        Solved,
+        Unsolvable,
+      };
+
       /// @brief - Convenience information defining the state of the
       /// game. It includes information about whether the menus should
       /// be displayed and if the user actions should be interpreted
@@ -275,6 +292,10 @@ namespace pge {
 
         // The current mode attached to the game.
         Mode mode;
+
+        // The current solver step. Only relevant in case the
+        // general mode of the game is set to `Solver`.
+        SolverStep solverStep;
       };
 
       /// @brief - Convenience structure allowing to regroup
@@ -291,6 +312,13 @@ namespace pge {
 
         // The solve button for the solver mode.
         MenuShPtr solve;
+
+        // The alert menu indicating that the sudoku was solved.
+        TimedMenu solvedAlert;
+
+        // The alert menu indicating the the sudoku couldn't be
+        // solved.
+        TimedMenu unsolvableAlert;
       };
 
       /// @brief - Convenience structure registering the properties
