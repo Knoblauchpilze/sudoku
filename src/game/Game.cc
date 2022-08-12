@@ -196,6 +196,11 @@ namespace pge {
     m_board->initialize();
   }
 
+  void
+  Game::clear() {
+    m_board->clear();
+  }
+
   const sudoku::Board&
   Game::board() const noexcept {
     return (*m_board)();

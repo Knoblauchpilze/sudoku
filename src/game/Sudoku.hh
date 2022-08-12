@@ -48,6 +48,12 @@ namespace sudoku {
       operator()() const noexcept;
 
       /**
+       * @brief - Clear any data contained in the board.
+       */
+      void
+      clear() noexcept;
+
+      /**
        * @brief - Initialize the board with a new game.
        */
       void

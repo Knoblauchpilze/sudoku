@@ -117,6 +117,12 @@ namespace pge {
       reset();
 
       /**
+       * @brief - Clear any data in the board.
+       */
+      void
+      clear();
+
+      /**
        * @brief - Returns the board attached to this game.
        * @return - the board attached to this game.
        */

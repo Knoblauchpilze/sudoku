@@ -48,6 +48,11 @@ namespace sudoku {
   }
 
   void
+  Game::clear() noexcept {
+    m_board.reset();
+  }
+
+  void
   Game::initialize() noexcept {
     // Reset the board and generate it with a certain
     // amount of numbers visible still.

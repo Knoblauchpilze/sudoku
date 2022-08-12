@@ -216,8 +216,9 @@ namespace pge {
     // Add each option to the screen.
     MenuShPtr m = generateScreenOption(dims, "Solver", olc::VERY_DARK_CYAN, "solver", true);
     m->setSimpleAction(
-      [this](Game& /*g*/) {
-        // TODO: Handle solver mode.
+      [this](Game& g) {
+        g.clear();
+        setScreen(Screen::Game);
       }
     );
     m_modeSelector->addMenu(m);
