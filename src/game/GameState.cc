@@ -214,21 +214,21 @@ namespace pge {
     m_modeSelector = generateDefaultScreen(dims, olc::DARK_CYAN);
 
     // Add each option to the screen.
-    MenuShPtr m = generateScreenOption(dims, "Solver", olc::VERY_DARK_CYAN, "solver", true);
+    MenuShPtr m = generateScreenOption(dims, "Play", olc::VERY_DARK_CYAN, "play", true);
+    m->setSimpleAction(
+      [this](Game& g) {
+        g.setMode(Mode::Interactive);
+        setScreen(Screen::DifficultySelector);
+      }
+    );
+    m_modeSelector->addMenu(m);
+
+    m = generateScreenOption(dims, "Solver", olc::VERY_DARK_CYAN, "solver", true);
     m->setSimpleAction(
       [this](Game& g) {
         g.clear();
         g.setMode(Mode::Solver);
         setScreen(Screen::Game);
-      }
-    );
-    m_modeSelector->addMenu(m);
-
-    m = generateScreenOption(dims, "Play", olc::VERY_DARK_CYAN, "play", true);
-    m->setSimpleAction(
-      [this](Game& g) {
-        g.setMode(Mode::Interactive);
-        setScreen(Screen::DifficultySelector);
       }
     );
     m_modeSelector->addMenu(m);

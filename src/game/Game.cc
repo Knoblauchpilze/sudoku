@@ -337,6 +337,8 @@ namespace pge {
 
     warn("Should handle solving");
     m_state.solverStep = SolverStep::Unsolvable;
+
+    // TODO: Solve the sudoku.
   }
 
   void

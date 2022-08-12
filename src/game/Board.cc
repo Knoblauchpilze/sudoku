@@ -59,7 +59,7 @@ namespace sudoku {
       );
     }
 
-    /// TODO: Handle this.
+    /// TODO: Determine if a digit can fit.
     return digit % 2 == 0u;
   }
 
@@ -70,8 +70,19 @@ namespace sudoku {
 
   bool
   Board::generate(unsigned digits) noexcept {
-    /// TODO: Handle generation of the sudoku.
+    /// TODO: Generate a valid sudoku.
     warn("Should generate game with " + std::to_string(digits) + " digit(s)");
+
+    unsigned id = 0u;
+    while (id < digits) {
+      unsigned x = std::rand() % 9u;
+      unsigned y = std::rand() % 9u;
+
+      m_board[linear(x, y)] = 1u + std::rand() % 9u;
+
+      ++id;
+    }
+
     return false;
   }
 
