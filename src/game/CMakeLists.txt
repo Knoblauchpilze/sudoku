@@ -1,6 +1,9 @@
 
+add_subdirectory (
+	${CMAKE_CURRENT_SOURCE_DIR}/algorithm
+	)
+
 target_sources (main-app_lib PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/Board.cc
 	${CMAKE_CURRENT_SOURCE_DIR}/Sudoku.cc
 
 	${CMAKE_CURRENT_SOURCE_DIR}/Game.cc
