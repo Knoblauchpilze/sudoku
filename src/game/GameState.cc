@@ -167,7 +167,7 @@ namespace pge {
 
   void
   GameState::onSavedGamePicked(const std::string& game) {
-    log("Picked saved game \"" + game + "\"", utils::Level::Info);
+    info("Picked saved game \"" + game + "\"");
 
     m_game.load(game);
     setScreen(Screen::Game);

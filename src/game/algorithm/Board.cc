@@ -132,11 +132,10 @@ namespace sudoku {
       out.write(raw, size);
     }
 
-    log(
+    info(
       "Saved content of board with dimensions " +
       std::to_string(m_width) + "x" + std::to_string(m_height) +
-      " to \"" + file + "\"",
-      utils::Level::Info
+      " to \"" + file + "\""
     );
   }
 
@@ -170,10 +169,7 @@ namespace sudoku {
       out.read(reinterpret_cast<char*>(&m_board[id]), sizeof(unsigned));
     }
 
-    log(
-      "Loaded board with dimensions " + std::to_string(m_width) + "x" + std::to_string(m_height),
-      utils::Level::Info
-    );
+    info("Loaded board with dimensions " + std::to_string(m_width) + "x" + std::to_string(m_height));
   }
 
   inline
