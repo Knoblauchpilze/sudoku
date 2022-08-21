@@ -2,6 +2,7 @@
 # include "Game.hh"
 # include <cxxabi.h>
 # include "Menu.hh"
+# include "SudokuMatrix.hh"
 
 /// @brief - The height of the main menu.
 # define STATUS_MENU_HEIGHT 50
@@ -257,6 +258,11 @@ namespace pge {
       );
 
       put = true;
+
+      // Reset the solver step.
+      if (m_state.mode == Mode::Solver) {
+        m_state.solverStep = SolverStep::Preparing;
+      }
     }
   }
 
@@ -408,10 +414,28 @@ namespace pge {
       return;
     }
 
-    warn("Should handle solving");
-    m_state.solverStep = SolverStep::Unsolvable;
+    log("Solving sudoku...");
+    m_state.solverStep = SolverStep::Solving;
 
-    // TODO: Solve the sudoku.
+    std::stack<sudoku::algorithm::MatrixNode>* nodes;
+
+    const sudoku::Board& b = (*m_board)();
+    withSafetyNet(
+      [&nodes, &b]() {
+        sudoku::algorithm::SudokuMatrix solver;
+        nodes = solver.solve(b);
+      },
+      "SudokuMatrix::solve"
+    );
+
+    if (nodes == nullptr || nodes->empty()) {
+      m_state.solverStep = SolverStep::Unsolvable;
+    }
+    else {
+      m_state.solverStep = SolverStep::Solved;
+    }
+
+    delete nodes;
   }
 
   void

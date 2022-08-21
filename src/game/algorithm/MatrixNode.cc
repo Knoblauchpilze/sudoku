@@ -3,7 +3,7 @@
 
 namespace sudoku::algorithm {
 
-  Node::Node():
+  MatrixNode::MatrixNode():
     m_top(nullptr),
     m_bottom(nullptr),
     m_left(nullptr),
@@ -17,7 +17,7 @@ namespace sudoku::algorithm {
     m_colHeader(nullptr)
   {}
 
-  Node::Node(int row, int column, int value):
+  MatrixNode::MatrixNode(int row, int column, int value):
     m_top(nullptr),
     m_bottom(nullptr),
     m_left(nullptr),
@@ -32,78 +32,102 @@ namespace sudoku::algorithm {
   {}
 
   int
-  Node::row() const noexcept {
+  MatrixNode::row() const noexcept {
     return m_row;
   }
 
   int
-  Node::column() const noexcept {
+  MatrixNode::column() const noexcept {
     return m_column;
   }
 
   int
-  Node::value() const noexcept {
+  MatrixNode::value() const noexcept {
     return m_value;
   }
 
   bool
-  Node::header() const noexcept {
+  MatrixNode::header() const noexcept {
     return m_header;
   }
 
   void
-  Node::makeHeader() noexcept {
+  MatrixNode::makeHeader() noexcept {
     m_header = true;
   }
 
-  Node*
-  Node::top() const noexcept {
+  MatrixNode*
+  MatrixNode::top() const noexcept {
     return m_top;
   }
 
-  Node*
-  Node::bottom() const noexcept {
+  MatrixNode*
+  MatrixNode::bottom() const noexcept {
     return m_bottom;
   }
 
-  Node*
-  Node::left() const noexcept {
+  MatrixNode*
+  MatrixNode::left() const noexcept {
     return m_left;
   }
 
-  Node*
-  Node::right() const noexcept {
+  MatrixNode*
+  MatrixNode::right() const noexcept {
     return m_right;
   }
 
-  Node*
-  Node::headerNode() const noexcept {
+  MatrixNode*
+  MatrixNode::headerNode() const noexcept {
     return m_colHeader;
   }
 
   void
-  Node::linkTop(Node* top) noexcept {
+  MatrixNode::linkTop(MatrixNode* top) noexcept {
     m_top = top;
   }
 
   void
-  Node::linkBottom(Node* bottom) noexcept {
+  MatrixNode::linkBottom(MatrixNode* bottom) noexcept {
     m_bottom = bottom;
   }
 
   void
-  Node::linkLeft(Node* left) noexcept {
+  MatrixNode::linkLeft(MatrixNode* left) noexcept {
     m_left = left;
   }
 
   void
-  Node::linkRight(Node* right) noexcept {
+  MatrixNode::linkRight(MatrixNode* right) noexcept {
     m_right = right;
   }
 
   void
-  Node::setHeader(Node* header) noexcept {
+  MatrixNode::setHeader(MatrixNode* header) noexcept {
     m_colHeader = header;
+  }
+
+  std::string
+  MatrixNode::toString() const noexcept {
+    std::string out = "[";
+
+    if (m_header) {
+      out += "HEAD ";
+    }
+
+    out += "row: ";
+    out += std::to_string(m_row);
+    out += ", ";
+
+    out += "column: ";
+    out += std::to_string(m_column);
+    out += ", ";
+
+    out += "value: ";
+    out += std::to_string(m_value);
+
+    out += "]";
+
+    return out;
   }
 
 }

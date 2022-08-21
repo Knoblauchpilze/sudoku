@@ -1,14 +1,16 @@
 #ifndef    MATRIX_NODE_HH
 # define   MATRIX_NODE_HH
 
+# include <string>
+
 namespace sudoku::algorithm {
 
-  class Node {
+  class MatrixNode {
     public:
 
-    Node();
+    MatrixNode();
 
-    Node(int row, int column, int value);
+    MatrixNode(int row, int column, int value);
 
     int
     row() const noexcept;
@@ -25,49 +27,52 @@ namespace sudoku::algorithm {
     void
     makeHeader() noexcept;
 
-    Node*
+    MatrixNode*
     top() const noexcept;
 
-    Node*
+    MatrixNode*
     bottom() const noexcept;
 
-    Node*
+    MatrixNode*
     left() const noexcept;
 
-    Node*
+    MatrixNode*
     right() const noexcept;
 
-    Node*
+    MatrixNode*
     headerNode() const noexcept;
 
     void
-    linkTop(Node* top) noexcept;
+    linkTop(MatrixNode* top) noexcept;
 
     void
-    linkBottom(Node* bottom) noexcept;
+    linkBottom(MatrixNode* bottom) noexcept;
 
     void
-    linkLeft(Node* left) noexcept;
+    linkLeft(MatrixNode* left) noexcept;
 
     void
-    linkRight(Node* right) noexcept;
+    linkRight(MatrixNode* right) noexcept;
 
     void
-    setHeader(Node* header) noexcept;
+    setHeader(MatrixNode* header) noexcept;
+
+    std::string
+    toString() const noexcept;
 
     private:
 
-      Node* m_top;
-      Node* m_bottom;
-      Node* m_left;
-      Node* m_right;
+      MatrixNode* m_top;
+      MatrixNode* m_bottom;
+      MatrixNode* m_left;
+      MatrixNode* m_right;
 
       int m_row;
       int m_column;
       int m_value;
 
       bool m_header;
-      Node* m_colHeader;
+      MatrixNode* m_colHeader;
   };
 
 }
