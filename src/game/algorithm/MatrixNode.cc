@@ -130,4 +130,14 @@ namespace sudoku::algorithm {
     return out;
   }
 
+  bool
+  MatrixNode::equivalent(const MatrixNode* const rhs) const noexcept {
+    return (
+      rhs != nullptr &&
+      rhs->m_row == m_row &&
+      rhs->m_column == m_column &&
+      rhs->m_value == m_value
+    );
+  }
+
 }

@@ -60,6 +60,9 @@ namespace sudoku::algorithm {
     std::string
     toString() const noexcept;
 
+    bool
+    equivalent(const MatrixNode* const rhs) const noexcept;
+
     private:
 
       MatrixNode* m_top;

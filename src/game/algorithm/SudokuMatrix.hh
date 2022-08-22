@@ -16,7 +16,7 @@ namespace sudoku::algorithm {
       ~SudokuMatrix();
 
       void
-      print() const noexcept;
+      print(bool verbose = false) const noexcept;
 
       //pre: Root is not null
       //post: creates the DLX structure for the blank sudoku puzzle
@@ -61,7 +61,7 @@ namespace sudoku::algorithm {
       void
       uncover(MatrixNode* r);
 
-      // searches for find, if found, returns first found node, else returns NULL
+      // searches for find, if found, returns first found node, else returns nullptr
       MatrixNode*
       find(MatrixNode* find);
 
@@ -95,7 +95,7 @@ namespace sudoku::algorithm {
        * @brief - Points to first column header of the solution
        *          matrix.
        */
-      MatrixNode* Root;
+      MatrixNode* m_root;
 
       /**
        * @brief - The partial or full solution to the current
