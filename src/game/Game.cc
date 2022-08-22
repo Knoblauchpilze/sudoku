@@ -81,7 +81,7 @@ namespace pge {
         true,              // paused
         true,              // disabled
         false,             // terminated
-        Mode::Interactive, // mode
+        Mode::Solver,      // mode
         SolverStep::None,  // solverStep
       }
     ),
@@ -417,7 +417,7 @@ namespace pge {
     log("Solving sudoku...");
     m_state.solverStep = SolverStep::Solving;
 
-    std::stack<sudoku::algorithm::MatrixNode>* nodes;
+    std::stack<sudoku::algorithm::MatrixNode> nodes;
 
     const sudoku::Board& b = (*m_board)();
     withSafetyNet(
@@ -428,14 +428,12 @@ namespace pge {
       "SudokuMatrix::solve"
     );
 
-    if (nodes == nullptr || nodes->empty()) {
+    if (nodes.empty()) {
       m_state.solverStep = SolverStep::Unsolvable;
     }
     else {
       m_state.solverStep = SolverStep::Solved;
     }
-
-    delete nodes;
   }
 
   void

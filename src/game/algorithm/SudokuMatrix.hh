@@ -11,9 +11,12 @@ namespace sudoku::algorithm {
   class SudokuMatrix: public utils::CoreObject {
     public:
 
-      SudokuMatrix();  //default constructor
+      SudokuMatrix();
 
-      virtual ~SudokuMatrix();  //destructor
+      ~SudokuMatrix();
+
+      void
+      print() const noexcept;
 
       //pre: Root is not null
       //post: creates the DLX structure for the blank sudoku puzzle
@@ -28,17 +31,11 @@ namespace sudoku::algorithm {
       bool
       AddColumn(MatrixNode* newNode);
 
-      //pre: none
-      //post: prints debugging information to stdout
-      //    commented out code will print the matrix in column-dominant order
-      void
-      print();
-
       //pre: the matrix has been initialized
       //post: will solve the puzzle in the given file and return the solution in the stack structure
       //    A stack structure was chosen so that one could see the order in which the puzzle was solved
       //    with the last entries to the solution found on top
-      std::stack<MatrixNode>*
+      std::stack<MatrixNode>
       solve(const Board& board);
 
     private:
@@ -94,14 +91,22 @@ namespace sudoku::algorithm {
 
     private:
 
-      //points to first column header of matrix
+      /**
+       * @brief - Points to first column header of the solution
+       *          matrix.
+       */
       MatrixNode* Root;
 
-      //the partial or full solution to the current puzzle
-      std::stack<MatrixNode>* workingSolution;
+      /**
+       * @brief - The partial or full solution to the current
+       *          puzzle.
+       */
+      std::stack<MatrixNode> m_workingSolution;
 
-      //if solution found, true, else false
-      bool Solved;
+      /**
+       * @brief - Whether the puzzle has been solved.
+       */
+      bool m_solved;
 
       int totalCompetition;
   };

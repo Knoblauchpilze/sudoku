@@ -28,23 +28,50 @@ namespace {
 namespace sudoku::algorithm {
 
   SudokuMatrix::SudokuMatrix():
-    utils::CoreObject("SudokuMatrix")
+    utils::CoreObject("SudokuMatrix"),
+    Root(new MatrixNode()),
+
+    m_workingSolution(),
+    m_solved(false)
   {
-    Root = new MatrixNode();//points to upper left corner of matrix
+    // points to upper left corner of matrix
     Root->makeHeader();
-    //Root points to itself in all directions
+    // Root points to itself in all directions
     Root->linkRight(Root);
     Root->linkLeft(Root);
     Root->linkTop(Root);
     Root->linkBottom(Root);
-    workingSolution = new std::stack<MatrixNode>();
-    Solved = false;
   }
 
   SudokuMatrix::~SudokuMatrix() {
     deleteMatrix();
     delete Root;
-    delete workingSolution;
+  }
+
+  void
+  SudokuMatrix::print() const noexcept {
+    if (Root == nullptr) {
+      return;
+    }
+
+    int count = 0;
+    int colCount = 0;
+    MatrixNode* printNode = Root->right();
+    MatrixNode* printNodeNext = Root->right();
+    while(printNodeNext != Root) {
+      colCount++;
+      printNode = printNodeNext->bottom();
+
+      while(!printNode->header()) {
+        //std::cout << printNode->row << ", " << printNode->column << ", " << printNode->val << endl;
+        printNode=printNode->bottom();
+        count++;
+      }
+
+      printNodeNext = printNodeNext->right();
+    }
+
+    log("Counted " + std::to_string(count) + " values, " + std::to_string(colCount) + " Column Headers");
   }
 
   bool
@@ -77,32 +104,6 @@ namespace sudoku::algorithm {
   }
 
   void
-  SudokuMatrix::print() {
-    //simply print matrix to stdout
-    if (Root==NULL)
-      return;
-
-    int count = 0;
-    int colCount = 0;
-    MatrixNode* printNode = Root->right();
-    MatrixNode* printNodeNext = Root->right();
-    while(printNodeNext != Root)
-    {
-      colCount++;
-      printNode = printNodeNext->bottom();
-      while(!printNode->header())
-      {
-        //std::cout << printNode->row << ", " << printNode->column << ", " << printNode->val << endl;
-        printNode=printNode->bottom();
-        count++;
-      }
-      printNodeNext = printNodeNext->right();
-    }
-
-    log("Counted " + std::to_string(count) + " values, " + std::to_string(colCount) + " Column Headers");
-  }
-
-  void
   SudokuMatrix::deleteMatrix() {
     MatrixNode* deleteNextCol = Root->right();
     MatrixNode* deleteNextRow;
@@ -122,7 +123,7 @@ namespace sudoku::algorithm {
     }
   }
 
-  std::stack<MatrixNode>*
+  std::stack<MatrixNode>
   SudokuMatrix::solve(const Board& board) {
     //read in filename
     //find nodes corresponding to entries in puzzle, and add them to the partial solution
@@ -141,53 +142,57 @@ namespace sudoku::algorithm {
         return successful, solution
 
     */
-    Solved = false;
+    m_solved = false;
+
     totalCompetition = 0;
-    while(!workingSolution->empty()) {
-      workingSolution->pop();
+    while(!m_workingSolution.empty()) {
+      m_workingSolution.pop();
     }
 
     unsigned nextVal;
 
-    MatrixNode* toFind = NULL;
-    MatrixNode* insertNext = NULL;
-    std::stack<MatrixNode*> puzzleNodes;//list of nodes that were covered as part of reading in puzzle
+    MatrixNode* toFind = nullptr;
+    MatrixNode* insertNext = nullptr;
+    std::stack<MatrixNode*> puzzleNodes;
+
+    // List of nodes that were covered as part of reading in puzzle.
     MatrixNode* colNode,*nextRowInCol,*rowNode;
-    for (int i=0;i<MATRIX_SIZE;i++)//iterates through rows
-    {
-      for (int j=0;j<MATRIX_SIZE;j++) //iterates through columns
-      {
+
+    // Iterates through rows.
+    for (int i = 0 ; i < MATRIX_SIZE ; ++i) {
+      // Iterates through columns.
+      for (int j = 0 ; j < MATRIX_SIZE ; ++j) {
         nextVal = board.at(j, i);
-        if (nextVal > MATRIX_SIZE)
-        {
+
+        if (nextVal > MATRIX_SIZE) {
           log("Invalid Sudoku Puzzle specified", utils::Level::Error);
-          return nullptr;
+          return {};
         }
 
-        if (nextVal != 0)
-        {
+        if (nextVal != 0) {
           toFind = new MatrixNode(i,j,nextVal-1);
           insertNext = find(toFind);
-          if (insertNext == NULL)
-          {
+
+          if (insertNext == nullptr) {
             log("Error in Sudoku Puzzle " + std::to_string(i) + ", " + std::to_string(j) + " val= " + std::to_string(nextVal), utils::Level::Error);
-            return NULL;
+            return {};
           }
+
           colNode = insertNext->headerNode();
+
           //print();
+
           nextRowInCol = insertNext;
           cover(colNode);
 
           rowNode = nextRowInCol->right();
-          while(rowNode != nextRowInCol)
-          {
+          while(rowNode != nextRowInCol) {
             cover(rowNode->headerNode());
             rowNode = rowNode->right();
           }
 
-
           puzzleNodes.push(insertNext);
-          workingSolution->push(*insertNext);
+          m_workingSolution.push(*insertNext);
           delete toFind;
         }
       }
@@ -204,38 +209,26 @@ namespace sudoku::algorithm {
 
     //print();
 
-    //uncover the nodes that we covered earlier, so that we can solve a different puzzle
-    //in the future
-    while(!puzzleNodes.empty())
-    {
+    // Uncover the nodes that we covered earlier, so that we
+    // can solve a different puzzle in the future.
+    while(!puzzleNodes.empty()) {
       colNode = puzzleNodes.top()->headerNode();
       nextRowInCol = (puzzleNodes.top());
 
 
       rowNode = nextRowInCol->right();
-      while(rowNode != nextRowInCol)
-      {
+      while(rowNode != nextRowInCol) {
         uncover(rowNode->headerNode());
         rowNode = rowNode->right();
       }
+
       uncover(colNode);
       puzzleNodes.pop();
     }
 
-    std::stack<MatrixNode> temp,*toRet;
-    while(!workingSolution->empty())
-    {
-      temp.push(workingSolution->top());
-      workingSolution->pop();
-    }
-    toRet = new std::stack<MatrixNode>();
-    while(!temp.empty())
-    {
-      toRet->push(temp.top());
-      temp.pop();
-    }
-
-    return toRet;
+    std::stack<MatrixNode> out;
+    out.swap(m_workingSolution);
+    return out;
   }
 
   void
@@ -243,10 +236,9 @@ namespace sudoku::algorithm {
     MatrixNode *RowNode, *RightNode,*ColNode=r->headerNode();
     ColNode->right()->linkLeft(ColNode->left());
     ColNode->left()->linkRight(ColNode->right());
-    for(RowNode = ColNode->bottom(); RowNode!=ColNode; RowNode = RowNode->bottom())
-    {
-      for(RightNode = RowNode->right(); RightNode!=RowNode; RightNode = RightNode->right())
-      {
+
+    for(RowNode = ColNode->bottom(); RowNode!=ColNode; RowNode = RowNode->bottom()) {
+      for(RightNode = RowNode->right(); RightNode!=RowNode; RightNode = RightNode->right()) {
         RightNode->top()->linkBottom(RightNode->bottom());
         RightNode->bottom()->linkTop(RightNode->top());
       }
@@ -256,33 +248,37 @@ namespace sudoku::algorithm {
   void
   SudokuMatrix::uncover(MatrixNode* r) {
     MatrixNode *RowNode, *LeftNode,*ColNode=r->headerNode();
-    for(RowNode = ColNode->top(); RowNode!=ColNode; RowNode = RowNode->top())
-    {
+
+    for(RowNode = ColNode->top(); RowNode!=ColNode; RowNode = RowNode->top()) {
       for(LeftNode = RowNode->left(); LeftNode!=RowNode; LeftNode = LeftNode->left()) {
         LeftNode->top()->linkBottom(LeftNode);
         LeftNode->bottom()->linkTop(LeftNode);
       }
     }
+
     ColNode->right()->linkLeft(ColNode);
     ColNode->left()->linkRight(ColNode);
   }
 
   bool
   SudokuMatrix::isEmpty() {
-    return (Root->right() == Root);
+    return Root->right() == Root;
   }
 
   bool
   SudokuMatrix::solve() {
-    if (isEmpty())
-      return true; //matrix is empty, solutions is filled
+    if (isEmpty()) {
+      // Matrix is empty, solution has been found.
+      return true;
+    }
 
     int numCols;
     MatrixNode* nextCol = NULL;
     nextCol = chooseNextColumn(numCols);
 
-    if (numCols < 1)
+    if (numCols < 1) {
       return false;
+    }
 
     totalCompetition += numCols;
 
@@ -291,27 +287,22 @@ namespace sudoku::algorithm {
     cover(nextCol);
 
     //need check for solved so that matrix is successfully uncovered after solve, for memory management purposes
-    while(nextRowInCol != nextCol && !Solved)
-    {
-      workingSolution->push(*nextRowInCol);
-      //cover(nextRowInCol);
+    while(nextRowInCol != nextCol && !m_solved) {
+      m_workingSolution.push(*nextRowInCol);
+
       rowNode = nextRowInCol->right();
-      while(rowNode != nextRowInCol)
-      {
+      while(rowNode != nextRowInCol) {
         cover(rowNode->headerNode());
         rowNode = rowNode->right();
       }
 
-      Solved=solve();
-      if (!Solved)
-      {
-        workingSolution->pop();
+      m_solved = solve();
+      if (!m_solved) {
+        m_workingSolution.pop();
       }
 
-
       rowNode = nextRowInCol->right();
-      while(rowNode != nextRowInCol)
-      {
+      while(rowNode != nextRowInCol) {
         uncover(rowNode->headerNode());
         rowNode = rowNode->right();
       }
@@ -321,7 +312,7 @@ namespace sudoku::algorithm {
 
     uncover(nextCol);
 
-    return Solved; //could not satisfy constraints of this column
+    return m_solved;
   }
 
   MatrixNode*
@@ -334,33 +325,34 @@ namespace sudoku::algorithm {
 
     MatrixNode* next = currentBest->bottom();
     MatrixNode* nextCol = currentBest;
-    while(nextCol != Root)
-    {
+    while(nextCol != Root) {
       next = nextCol->bottom();
       tempCount = 0;
-      while(next != nextCol)
-      {
-        if (next == next->bottom())
-        {
+
+      while(next != nextCol) {
+        if (next == next->bottom()) {
           error("Err! Link is its own bottom");
         }
+
         tempCount++;
         next = next->bottom();
       }
-      if (tempCount < best || best == -1)
-      {
+
+      if (tempCount < best || best == -1) {
         currentBest = nextCol;
         best = tempCount;
       }
+
       nextCol = nextCol->right();
     }
 
-    if (currentBest == Root) //then we have a problem
-    {
+    if (currentBest == Root) {
+      // This is a problem.
       error("Attempted to choose column from empty matrix!");
     }
 
     count = best;
+
     return currentBest;
   }
 
@@ -368,64 +360,66 @@ namespace sudoku::algorithm {
   SudokuMatrix::find(MatrixNode* find) {
     MatrixNode* rightNode,*bottomNode;
     rightNode = Root->right();
-    while(rightNode != Root) //iterate through column headers
-    {
+
+    // Iterate through column headers.
+    while(rightNode != Root) {
       bottomNode = rightNode->bottom();
-      while(bottomNode != rightNode) //iterate through columns
-      {
-        if (bottomNode->row() == find->row() && bottomNode->column() == find->column() && bottomNode->value() == find->value())
-        {
+
+      // Iterate through columns.
+      while(bottomNode != rightNode) {
+        if (bottomNode->row() == find->row() && bottomNode->column() == find->column() && bottomNode->value() == find->value()) {
           return bottomNode;
         }
+
         bottomNode = bottomNode->bottom();
       }
+
       rightNode = rightNode->right();
     }
 
-    //not found
-    return NULL;
+    return nullptr;
   }
 
   bool
   SudokuMatrix::initialize() {
-    //Step 1: Construct maximum matrix (324x729)
-    //Step 2: Use maximum matrix to build dancing links structure (matrix A)
-    //Step 3: Read in initial sudoku grid of 1s and 0s
-    //Step 4: Parse sudoku grid for {r,c,b,v}, and add those to the partial solution S* (removing from A)
-      //r=row c=column b=box v=value (1,2,3,...,9)
-    //Step 5: Perform Algorithm X on remaining A until exact cover is found --> S* is final solution
-    //Step 6: Output final solution
+    // Step 1: Construct maximum matrix (324x729)
+    // Step 2: Use maximum matrix to build dancing links structure (matrix A)
+    // Step 3: Read in initial sudoku grid of 1s and 0s
+    // Step 4: Parse sudoku grid for {r,c,b,v}, and add those to the partial solution S* (removing from A)
+    // r=row c=column b=box v=value (1,2,3,...,9)
+    // Step 5: Perform Algorithm X on remaining A until exact cover is found --> S* is final solution
+    // Step 6: Output final solution
 
     MatrixNode* matrix[MAX_ROWS][MAX_COLS];
-    //initialize matrix
-    for (int i=0;i<MAX_ROWS;i++)
-    {
-      for (int j=0;j<MAX_COLS;j++)
-      {
-        matrix[i][j] = NULL;
+
+    // Initialize matrix.
+    for (int i = 0 ; i < MAX_ROWS ; ++i) {
+      for (int j = 0 ; j < MAX_COLS ; ++j) {
+        matrix[i][j] = nullptr;
       }
     }
 
-    //set appropriate non-null values in matrix
+    // Set appropriate non-null values in matrix.
     int row=0;
     MatrixNode *rowNode,*colNode,*cellNode,*boxNode;
-    for (int i=0;i<MATRIX_SIZE;i++) //rows
-    {
-      for (int j=0;j<MATRIX_SIZE;j++) //columns
-      {
-        for (int k=0;k<MATRIX_SIZE;k++) //values
-        {
-          row = (i*COL_OFFSET+j*MATRIX_SIZE+k);
 
-          //each one of these 729 combinations of r,c,and v results in 4 constraints being satisfied in our grid
-          //i.e. 4 NULL values changed to Non-Null values
-          //this is a *very* sparse matrix, which is why it will be converted to a DLX (Dancing Links) representation
+    // Rows.
+    for (int i = 0 ; i < MATRIX_SIZE ; ++i) {
+      // Columns.
+      for (int j = 0 ; j < MATRIX_SIZE ; ++j) {
+        // Values.
+        for (int k = 0 ; k < MATRIX_SIZE ; ++k) {
+          row = i * COL_OFFSET + j * MATRIX_SIZE + k;
+
+          // Each one of these 729 combinations of r,c,and v results in 4 constraints being satisfied in our grid
+          // i.e. 4 nullptr values changed to Non-Null values
+          // this is a *very* sparse matrix, which is why it will be converted to a DLX (Dancing Links) representation
           rowNode=matrix[row][ROW_OFFSET+(i*MATRIX_SIZE+k)] = new MatrixNode(i,j,k);
           colNode=matrix[row][COL_OFFSET+(j*MATRIX_SIZE+k)] = new MatrixNode(i,j,k);
           cellNode=matrix[row][CELL_OFFSET+(i*MATRIX_SIZE+j)] = new MatrixNode(i,j,k);
           boxNode=matrix[row][BOX_OFFSET+((i/ROW_BOX_DIVISOR + j/COL_BOX_DIVISOR * COL_BOX_DIVISOR)*MATRIX_SIZE+k)] = new MatrixNode(i,j,k);
 
-          //link the nodes we just created to save time later
+          // Link the nodes we just created to save time later.
           rowNode->linkRight(colNode);
           rowNode->linkLeft(boxNode);
           colNode->linkLeft(rowNode);
@@ -434,19 +428,19 @@ namespace sudoku::algorithm {
           cellNode->linkRight(boxNode);
           boxNode->linkLeft(cellNode);
           boxNode->linkRight(rowNode);
-
         }
       }
     }
 
-    //Link columns together for dancing links
+    // Link columns together for dancing links.
     MatrixNode* nextColHeader;
     MatrixNode* nextColRow;
-    for (int j=0;j<MAX_COLS;j++)
-    {
+
+    for (int j = 0 ; j < MAX_COLS ; ++j) {
       nextColHeader = new MatrixNode();
       nextColHeader->makeHeader();
-      //link colHeader to self
+
+      // Link colHeader to self.
       nextColHeader->linkTop(nextColHeader);
       nextColHeader->linkBottom(nextColHeader);
       nextColHeader->linkLeft(nextColHeader);
@@ -454,36 +448,36 @@ namespace sudoku::algorithm {
       nextColHeader->setHeader(nextColHeader);
       nextColRow = nextColHeader;
 
-      for (int i=0;i<MAX_ROWS;i++)
-      {
-        if (matrix[i][j] != NULL)
-        {
-          //search down rows to add to column
+      for (int i = 0 ; i < MAX_ROWS ; ++i) {
+        if (matrix[i][j] != nullptr) {
+          // Search down rows to add to column.
           matrix[i][j]->linkTop(nextColRow);
           nextColRow->linkBottom(matrix[i][j]);
+
           matrix[i][j]->linkBottom(nextColHeader);
           nextColHeader->linkTop(matrix[i][j]);
+
           matrix[i][j]->setHeader(nextColHeader);
           nextColRow = matrix[i][j];
         }
       }
-      if (nextColHeader->bottom() == nextColHeader)
-      {
+
+      if (nextColHeader->bottom() == nextColHeader) {
         log("Err! column has no rows! col:" + std::to_string(j), utils::Level::Error);
       }
-      if(!AddColumn(nextColHeader))
-      {
+
+      if(!AddColumn(nextColHeader)) {
         log("Error in adding column to matrix", utils::Level::Error);
 
-        //cleanup
-        for (int i=0;i<MAX_ROWS;i++)
-        {
-          for (int j=0;j<MAX_COLS;j++)
-          {
-            if (matrix[i][j] != NULL)
+        // Cleanup.
+        for (int i = 0 ; i < MAX_ROWS ; ++i) {
+          for (int j = 0 ; j < MAX_COLS ; ++j) {
+            if (matrix[i][j] != nullptr) {
               delete matrix[i][j];
+            }
           }
         }
+
         return false;
       }
     }

@@ -51,7 +51,7 @@ namespace sudoku {
   }
 
   bool
-  Board::canFit(unsigned x, unsigned y, unsigned digit) const {
+  Board::canFit(unsigned x, unsigned y, unsigned /*digit*/) const {
     if (x >= m_width || y >= m_height) {
       error(
         "Failed to fetch digit status",
@@ -60,7 +60,7 @@ namespace sudoku {
     }
 
     /// TODO: Determine if a digit can fit.
-    return digit % 2 == 0u;
+    return true;
   }
 
   void
@@ -71,7 +71,7 @@ namespace sudoku {
         "Invalid coordinate " + std::to_string(x) + "x" + std::to_string(y)
       );
     }
-    if (digit >= 9u) {
+    if (digit >= 10u) {
       error(
         "Failed to put number on board",
         "Invalid digit " + std::to_string(digit) + " not in range [0; 9]"
