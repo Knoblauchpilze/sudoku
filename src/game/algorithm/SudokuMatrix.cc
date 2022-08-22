@@ -58,6 +58,7 @@ namespace sudoku::algorithm {
     int colCount = 0;
     MatrixNode* printNode = m_root->right();
     MatrixNode* printNodeNext = m_root->right();
+
     while(printNodeNext != m_root) {
       colCount++;
       printNode = printNodeNext->bottom();
@@ -239,12 +240,15 @@ namespace sudoku::algorithm {
 
   void
   SudokuMatrix::cover(MatrixNode* r) {
-    MatrixNode *RowNode, *RightNode,*ColNode=r->headerNode();
+    MatrixNode* RowNode;
+    MatrixNode* RightNode;
+    MatrixNode* ColNode = r->headerNode();
+
     ColNode->right()->linkLeft(ColNode->left());
     ColNode->left()->linkRight(ColNode->right());
 
-    for(RowNode = ColNode->bottom(); RowNode!=ColNode; RowNode = RowNode->bottom()) {
-      for(RightNode = RowNode->right(); RightNode!=RowNode; RightNode = RightNode->right()) {
+    for(RowNode = ColNode->bottom() ; RowNode != ColNode ; RowNode = RowNode->bottom()) {
+      for(RightNode = RowNode->right() ; RightNode != RowNode ; RightNode = RightNode->right()) {
         RightNode->top()->linkBottom(RightNode->bottom());
         RightNode->bottom()->linkTop(RightNode->top());
       }
@@ -253,10 +257,12 @@ namespace sudoku::algorithm {
 
   void
   SudokuMatrix::uncover(MatrixNode* r) {
-    MatrixNode *RowNode, *LeftNode,*ColNode=r->headerNode();
+    MatrixNode* RowNode;
+    MatrixNode* LeftNode;
+    MatrixNode* ColNode = r->headerNode();
 
-    for(RowNode = ColNode->top(); RowNode!=ColNode; RowNode = RowNode->top()) {
-      for(LeftNode = RowNode->left(); LeftNode!=RowNode; LeftNode = LeftNode->left()) {
+    for(RowNode = ColNode->top() ; RowNode != ColNode ; RowNode = RowNode->top()) {
+      for(LeftNode = RowNode->left() ; LeftNode != RowNode ; LeftNode = LeftNode->left()) {
         LeftNode->top()->linkBottom(LeftNode);
         LeftNode->bottom()->linkTop(LeftNode);
       }
@@ -367,7 +373,9 @@ namespace sudoku::algorithm {
 
   MatrixNode*
   SudokuMatrix::find(MatrixNode* find) {
-    MatrixNode* rightNode,*bottomNode;
+    MatrixNode* rightNode;
+    MatrixNode* bottomNode;
+
     rightNode = m_root->right();
 
     // Iterate through column headers.
@@ -376,7 +384,7 @@ namespace sudoku::algorithm {
 
       // Iterate through columns.
       while(bottomNode != rightNode) {
-        if (bottomNode->row() == find->row() && bottomNode->column() == find->column() && bottomNode->value() == find->value()) {
+        if (bottomNode->equivalent(find)) {
           return bottomNode;
         }
 
@@ -409,8 +417,11 @@ namespace sudoku::algorithm {
     }
 
     // Set appropriate non-null values in matrix.
-    int row=0;
-    MatrixNode *rowNode,*colNode,*cellNode,*boxNode;
+    int row = 0;
+    MatrixNode* rowNode = nullptr;
+    MatrixNode* colNode = nullptr;
+    MatrixNode* cellNode = nullptr;
+    MatrixNode* boxNode = nullptr;
 
     // Rows.
     for (int i = 0 ; i < MATRIX_SIZE ; ++i) {
@@ -426,10 +437,17 @@ namespace sudoku::algorithm {
           // values this is a *very* sparse matrix, which is
           // why it will be converted to a DLX (Dancing Links)
           // representation.
-          rowNode=matrix[row][ROW_OFFSET+(i*MATRIX_SIZE+k)] = new MatrixNode(i,j,k);
-          colNode=matrix[row][COL_OFFSET+(j*MATRIX_SIZE+k)] = new MatrixNode(i,j,k);
-          cellNode=matrix[row][CELL_OFFSET+(i*MATRIX_SIZE+j)] = new MatrixNode(i,j,k);
-          boxNode=matrix[row][BOX_OFFSET+((i/ROW_BOX_DIVISOR + j/COL_BOX_DIVISOR * COL_BOX_DIVISOR)*MATRIX_SIZE+k)] = new MatrixNode(i,j,k);
+          rowNode = new MatrixNode(i,j,k);
+          matrix[row][ROW_OFFSET + i * MATRIX_SIZE + k] = rowNode;
+
+          colNode = new MatrixNode(i,j,k);
+          matrix[row][COL_OFFSET + j * MATRIX_SIZE + k] = colNode;
+
+          cellNode = new MatrixNode(i,j,k);
+          matrix[row][CELL_OFFSET + i * MATRIX_SIZE + j] = cellNode;
+
+          boxNode = new MatrixNode(i,j,k);
+          matrix[row][BOX_OFFSET + (i / ROW_BOX_DIVISOR + j / COL_BOX_DIVISOR * COL_BOX_DIVISOR) * MATRIX_SIZE + k] = boxNode;
 
           // Link the nodes we just created to save time later.
           rowNode->linkRight(colNode);
