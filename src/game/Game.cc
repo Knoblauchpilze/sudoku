@@ -3,6 +3,7 @@
 # include <cxxabi.h>
 # include "Menu.hh"
 # include "SudokuMatrix.hh"
+# include "SudokuMatrixV2.hh"
 
 /// @brief - The height of the main menu.
 # define STATUS_MENU_HEIGHT 50
@@ -247,7 +248,7 @@ namespace pge {
         continue;
       }
 
-      if (!m_board->put(ux, uy, m_hint.digit)) {
+      if (!m_board->put(ux, uy, m_hint.digit, sudoku::DigitKind::UserGenerated)) {
         ++m_hint.digit;
         continue;
       }
@@ -374,7 +375,7 @@ namespace pge {
       return;
     }
 
-    if (!m_board->put(m_hint.x, m_hint.y, digit)) {
+    if (!m_board->put(m_hint.x, m_hint.y, digit, sudoku::DigitKind::UserGenerated)) {
       warn(
         "Failed to put digit " + std::to_string(digit) +
         " at " + std::to_string(m_hint.x) + "x" + std::to_string(m_hint.y)
@@ -422,7 +423,8 @@ namespace pge {
     const sudoku::Board& b = (*m_board)();
     withSafetyNet(
       [&nodes, &b]() {
-        sudoku::algorithm::SudokuMatrix solver;
+        //sudoku::algorithm::SudokuMatrix solver;
+        sudoku::algorithm::SudokuMatrixV2 solver;
         nodes = solver.solve(b);
       },
       "SudokuMatrix::solve"
@@ -433,6 +435,19 @@ namespace pge {
     }
     else {
       m_state.solverStep = SolverStep::Solved;
+    }
+
+    // Fill in the puzzle.
+    while (!nodes.empty()) {
+      sudoku::algorithm::MatrixNode node = nodes.top();
+      nodes.pop();
+
+      m_board->put(
+        node.column(),
+        node.row(),
+        node.value(),
+        sudoku::DigitKind::Solved
+      );
     }
   }
 

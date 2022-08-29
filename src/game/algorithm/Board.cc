@@ -11,7 +11,8 @@ namespace sudoku {
     m_width(9u),
     m_height(9u),
 
-    m_board(w() * h(), 0u)
+    m_board(w() * h(), 0u),
+    m_kinds(w() * h(), DigitKind::None)
   {
     setService("sudoku");
   }
@@ -39,12 +40,16 @@ namespace sudoku {
   }
 
   unsigned
-  Board::at(unsigned x, unsigned y) const {
+  Board::at(unsigned x, unsigned y, DigitKind* kind) const {
     if (x >= m_width || y >= m_height) {
       error(
         "Failed to fetch board number",
         "Invalid coordinate " + std::to_string(x) + "x" + std::to_string(y)
       );
+    }
+
+    if (kind != nullptr) {
+      *kind = m_kinds[linear(x, y)];
     }
 
     return m_board[linear(x, y)];
@@ -64,7 +69,11 @@ namespace sudoku {
   }
 
   void
-  Board::put(unsigned x, unsigned y, unsigned digit) {
+  Board::put(unsigned x,
+             unsigned y,
+             unsigned digit,
+             const DigitKind& kind)
+  {
     if (x >= m_width || y >= m_height) {
       error(
         "Failed to put number on board",
@@ -79,11 +88,13 @@ namespace sudoku {
     }
 
     m_board[linear(x, y)] = digit;
+    m_kinds[linear(x, y)] = (digit == 0u ? DigitKind::None : kind);
   }
 
   void
   Board::reset() noexcept {
     m_board = std::vector<unsigned>(w() * h(), 0u);
+    m_kinds = std::vector<DigitKind>(w() * h(), DigitKind::None);
   }
 
   bool
@@ -97,6 +108,7 @@ namespace sudoku {
       unsigned y = std::rand() % 9u;
 
       m_board[linear(x, y)] = 1u + std::rand() % 9u;
+      m_kinds[linear(x, y)] = DigitKind::Generated;
 
       ++id;
     }
@@ -119,6 +131,11 @@ namespace sudoku {
     unsigned buf, size = sizeof(unsigned);
     const char* raw = reinterpret_cast<const char*>(&buf);
 
+    std::vector<char> kBuf;
+    unsigned kSize = sizeof(std::underlying_type<DigitKind>::type);
+    kBuf.resize(kSize);
+    const char* kRaw = kBuf.data();
+
     // Save the dimensions of the board.
     buf = m_width;
     out.write(raw, size);
@@ -130,6 +147,9 @@ namespace sudoku {
     for (unsigned id = 0u ; id < m_board.size() ; ++id) {
       buf = m_board[id];
       out.write(raw, size);
+
+      kRaw = reinterpret_cast<char*>(&m_kinds[id]);
+      out.write(kRaw, kSize);
     }
 
     info(
@@ -164,9 +184,11 @@ namespace sudoku {
 
     // Read the content of the board.
     m_board = std::vector<unsigned>(m_width * m_height, 0u);
+    m_kinds = std::vector<DigitKind>(m_width * m_height, DigitKind::None);
 
     for (unsigned id = 0u ; id < m_board.size() ; ++id) {
       out.read(reinterpret_cast<char*>(&m_board[id]), sizeof(unsigned));
+      out.read(reinterpret_cast<char*>(&m_kinds[id]), sizeof(std::underlying_type<DigitKind>::type));
     }
 
     info("Loaded board with dimensions " + std::to_string(m_width) + "x" + std::to_string(m_height));

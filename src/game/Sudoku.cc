@@ -71,12 +71,22 @@ namespace sudoku {
   }
 
   bool
-  Game::put(unsigned x, unsigned y, unsigned digit) {
+  Game::put(unsigned x,
+            unsigned y,
+            unsigned digit,
+            const DigitKind& kind)
+  {
     if (!m_board.canFit(x, y, digit)) {
       return false;
     }
 
-    m_board.put(x, y, digit);
+    DigitKind eKind = DigitKind::None;
+    m_board.at(x, y, &eKind);
+    if (eKind == DigitKind::Generated) {
+      return false;
+    }
+
+    m_board.put(x, y, digit, kind);
 
     return true;
   }

@@ -1,9 +1,7 @@
-//  SudokuMatrix.cpp
-//  Author: Andy Giese
-//  Date: June 2011
-//  Purpose: Implements the SudokuMatrix ADT defined in SudokuMatrix.h
 
 # include "SudokuMatrix.hh"
+
+// https://gieseanw.wordpress.com/2011/06/16/solving-sudoku-revisited/
 
 namespace {
   //these are offsets into the matrix that specify the sections of columns pertaining to
@@ -41,6 +39,8 @@ namespace sudoku::algorithm {
     m_root->linkLeft(m_root);
     m_root->linkTop(m_root);
     m_root->linkBottom(m_root);
+
+    initialize();
   }
 
   SudokuMatrix::~SudokuMatrix() {
@@ -177,7 +177,7 @@ namespace sudoku::algorithm {
         }
 
         if (nextVal != 0) {
-          toFind = new MatrixNode(i,j,nextVal-1);
+          toFind = new MatrixNode(i, j, nextVal - 1);
           insertNext = find(toFind);
 
           if (insertNext == nullptr) {
@@ -186,8 +186,6 @@ namespace sudoku::algorithm {
           }
 
           colNode = insertNext->headerNode();
-
-          //print();
 
           nextRowInCol = insertNext;
           cover(colNode);
@@ -213,8 +211,6 @@ namespace sudoku::algorithm {
     else {
       log("Puzzle not solveable!", utils::Level::Error);
     }
-
-    //print();
 
     // Uncover the nodes that we covered earlier, so that we
     // can solve a different puzzle in the future.
@@ -293,6 +289,8 @@ namespace sudoku::algorithm {
     }
 
     totalCompetition += numCols;
+
+    log("Picking " + nextCol->toString());
 
     MatrixNode* nextRowInCol = nextCol->bottom();
     MatrixNode* rowNode;

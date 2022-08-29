@@ -7,6 +7,15 @@
 
 namespace sudoku {
 
+  /// @brief - The kind of digit: allows to determine whether
+  /// it is user-generated or not.
+  enum class DigitKind {
+    None,
+    Generated,
+    UserGenerated,
+    Solved,
+  };
+
   class Board: public utils::CoreObject {
     public:
 
@@ -44,10 +53,12 @@ namespace sudoku {
        *          in case the cell is empty.
        * @param x - the x coordinates.
        * @param y - the y coordinates.
+       * @param kind - optional argument indicating the type of the
+       *               digit at the specified position.
        * @return - the number at this place.
        */
       unsigned
-      at(unsigned x, unsigned y) const;
+      at(unsigned x, unsigned y, DigitKind* kind = nullptr) const;
 
       /**
        * @brief - Allow to determine whether or not the input number
@@ -65,9 +76,13 @@ namespace sudoku {
        * @param x - one of the coordinate where to put the digit.
        * @param y - one of the coordinate where to put the digit.
        * @param digit - the digit to put.
+       * @param kind - the kind of digit to put.
        */
       void
-      put(unsigned x, unsigned y, unsigned digit);
+      put(unsigned x,
+          unsigned y,
+          unsigned digit,
+          const DigitKind& kind);
 
       /**
        * @brief - Reset all tiles to be empty.
@@ -126,6 +141,13 @@ namespace sudoku {
        * @brief - The current state of the board.
        */
       mutable std::vector<unsigned> m_board;
+
+      /**
+       * @brief - The state of each cell on the board. This
+       *          indicates if they were created by the user
+       *          or automatically generated.
+       */
+      mutable std::vector<DigitKind> m_kinds;
   };
 
   using BoardShPtr = std::shared_ptr<Board>;

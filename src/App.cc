@@ -272,11 +272,27 @@ namespace pge {
     float s = 2.2f;
     olc::vf2d scale(s, s);
 
+    auto colorForDigit = [](const sudoku::DigitKind& kind) {
+      switch (kind) {
+        case sudoku::DigitKind::Generated:
+          return olc::DARK_APPLE_GREEN;
+        case sudoku::DigitKind::UserGenerated:
+          return olc::CYAN;
+        case sudoku::DigitKind::Solved:
+          return olc::DARK_ORANGE;
+        case sudoku::DigitKind::None:
+          // None is the default.
+        default:
+          return olc::RED;;
+      }
+    };
+
     const sudoku::Board& b = m_game->board();
 
     for (unsigned y = 0u ; y < 9u ; ++y) {
       for (unsigned x = 0u ; x < 9u ; ++x) {
-        unsigned digit = b.at(x, y);
+        sudoku::DigitKind kind;
+        unsigned digit = b.at(x, y, &kind);
 
         if (digit == 0u) {
           continue;
@@ -291,7 +307,7 @@ namespace pge {
         p -= sz * scale / 2.0f;
         p += res.cf.tileSize() / 2.0f;
 
-        DrawStringDecal(p, n, olc::CYAN, scale);
+        DrawStringDecal(p, n, colorForDigit(kind), scale);
       }
     }
   }
