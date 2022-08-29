@@ -1,6 +1,7 @@
 
 # include "SudokuMatrixV2.hh"
 # include <fstream>
+# include <limits>
 
 // https://gieseanw.wordpress.com/2011/06/16/solving-sudoku-revisited/
 // https://en.wikipedia.org/wiki/Exact_cover#Sudoku
@@ -152,7 +153,61 @@ namespace sudoku::algorithm {
           }
         }
       }
+
+      return true;
     }
+  }
+
+  bool
+  SudokuMatrixV2::SolutionStep::valid() const noexcept {
+    return row >= 0 && row < counting::rowsCount &&
+           column >= 0 && column < counting::columnsCount &&
+           value >= 0 && value < counting::candidates;
+  }
+
+  int
+  SudokuMatrixV2::Solver::chooseColumn(const std::vector<int>& matrix) const {
+    int best = -1;
+    int minOnes = std::numeric_limits<int>::max();
+
+    for (auto column : columns) {
+      int ones = 0;
+
+      for (auto row : rows) {
+        ones += matrix[row * counting::constraints + column];
+      }
+
+      if (ones < minOnes) {
+        minOnes = ones;
+        best = column;
+      }
+    }
+
+    return best;
+  }
+
+  int
+  SudokuMatrixV2::Solver::chooseRow(const std::vector<int>& matrix, int column) const {
+    for (auto row : rows) {
+      if (matrix[row * counting::constraints + column] == 1) {
+        return row;
+      }
+    }
+
+    return -1;
+  }
+
+  SudokuMatrixV2::SolutionStep
+  SudokuMatrixV2::Solver::fromRowIndex(int row) const noexcept {
+    int outDigit = row / counting::cellsCount;
+
+    int offset = outDigit * counting::cellsCount;
+    int linearCell = row - offset;
+
+    int outRow = linearCell / counting::columnsCount;
+    int outColumn = linearCell % counting::columnsCount;
+
+    return SolutionStep{outColumn, outRow, outDigit};
   }
 
   SudokuMatrixV2::SudokuMatrixV2():
@@ -161,29 +216,27 @@ namespace sudoku::algorithm {
     m_matrix(),
 
     m_solved(false)
-  {
-    initialize();
-  }
+  {}
 
   std::stack<MatrixNode>
   SudokuMatrixV2::solve(const Board& board) {
     m_solved = false;
 
-    initializePuzzle(board);
+    Solver helper = initializePuzzle(board);
 
-    if (!solve()) {
+    if (!solve(helper)) {
       log("Puzzle not solveable!", utils::Level::Error);
       return {};
     }
 
     log("Puzzle solved successfully!");
 
-    return buildSolution();
+    return buildSolution(helper);
   }
 
   void
   SudokuMatrixV2::initialize() {
-    m_matrix.resize(counting::choices * counting::constraints, 0);
+    m_matrix = std::vector<int>(counting::choices * counting::constraints, 0);
 
     if (!initializeMatrix(m_matrix)) {
       error("Failed to initialize Sudoku matrix");
@@ -210,19 +263,80 @@ namespace sudoku::algorithm {
     }
   }
 
-  void
+  SudokuMatrixV2::Solver
   SudokuMatrixV2::initializePuzzle(const Board& /*board*/) {
+    initialize();
+
+    Solver helper;
+    for (int column = 0 ; column < counting::constraints ; ++column) {
+      helper.columns.insert(column);
+    }
+
+    for (int row = 0 ; row < counting::choices; ++row) {
+      helper.rows.insert(row);
+    }
+
+    /// TODO: Handle board for initialization.
+
+    return helper;
+  }
+
+  void
+  SudokuMatrixV2::cover(int row, Solver& helper) {
+    if (helper.rows.count(row) == 0) {
+      error("Cannot hide row " + std::to_string(row) + " not available for picking anymore");
+    }
+
+    SolutionStep step = helper.fromRowIndex(row);
+    if (!step.valid()) {
+      error("Cannot hide row " + std::to_string(row) + ", failed to build solution step from it");
+    }
+    helper.steps.push_back(step);
+    log(
+      "Adding digit " + std::to_string(step.value) + " at " +
+       std::to_string(step.column + 1) + "x" + std::to_string(step.row + 1) +
+       " as step " + std::to_string(helper.steps.size() + 1)
+    );
+
+    helper.rows.erase(row);
+
+    Solver tmp;
+    std::swap(tmp, helper);
+
+    /// TODO: Handle covering.
   }
 
   bool
-  SudokuMatrixV2::solve() {
-    log("Solving...");
-    return true;
+  SudokuMatrixV2::solve(Solver& helper) {
+    if (helper.columns.empty()) {
+      return true;
+    }
+
+    int column = helper.chooseColumn(m_matrix);
+    if (column < 0) {
+      error("Failed to pick a column while " + std::to_string(helper.columns.size()) + " are available");
+    }
+    int row = helper.chooseRow(m_matrix, column);
+    if (row < 0) {
+      error("Failed to pick a row while " + std::to_string(helper.rows.size()) + " are available");
+    }
+
+    cover(row, helper);
+
+    return solve(helper);
   }
 
   std::stack<MatrixNode>
-  SudokuMatrixV2::buildSolution() {
-    return {};
+  SudokuMatrixV2::buildSolution(Solver& helper) {
+    std::stack<MatrixNode> out;
+
+    log("Building solution containing " + std::to_string(helper.steps.size()) + " step(s)");
+
+    for (const auto& step : helper.steps) {
+      out.push(MatrixNode(step.row, step.column, step.value));
+    }
+
+    return out;
   }
 
 }
