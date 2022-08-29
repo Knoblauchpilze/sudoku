@@ -31,24 +31,31 @@ namespace sudoku::algorithm {
 
       /// @brief - Convenience structure helping to solve the exact
       /// cover problem for the sudoku.
-      struct Solver {
-        /// @brief - The list of available columns to pick.
-        std::unordered_set<int> columns{};
+      class Solver: public utils::CoreObject {
+        public:
+          Solver();
 
-        /// @brief - The list of rows available to pick.
-        std::unordered_set<int> rows{};
+          int
+          chooseColumn(const std::vector<int>& matrix) const;
 
-        /// @brief - The steps taken for the solution.
-        std::vector<SolutionStep> steps{};
+          int
+          chooseRow(const std::vector<int>& matrix, int column) const;
 
-        int
-        chooseColumn(const std::vector<int>& matrix) const;
+          SolutionStep
+          fromRowIndex(int row) const noexcept;
 
-        int
-        chooseRow(const std::vector<int>& matrix, int column) const;
+          void
+          cover(int column, std::vector<int>& matrix);
 
-        SolutionStep
-        fromRowIndex(int row) const noexcept;
+        public:
+          /// @brief - The list of available columns to pick.
+          std::unordered_set<int> columns{};
+
+          /// @brief - The list of rows available to pick.
+          std::unordered_set<int> rows{};
+
+          /// @brief - The steps taken for the solution.
+          std::vector<SolutionStep> steps{};
       };
 
       void
@@ -59,9 +66,6 @@ namespace sudoku::algorithm {
 
       Solver
       initializePuzzle(const Board& board);
-
-      void
-      cover(int column, Solver& helper);
 
       bool
       solve(Solver& helper);
