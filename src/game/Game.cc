@@ -1,9 +1,9 @@
 
 # include "Game.hh"
 # include <cxxabi.h>
+# include <core_utils/Chrono.hh>
 # include "Menu.hh"
 # include "SudokuMatrix.hh"
-# include "SudokuMatrixV2.hh"
 
 /// @brief - The height of the main menu.
 # define STATUS_MENU_HEIGHT 50
@@ -415,7 +415,6 @@ namespace pge {
       return;
     }
 
-    log("Solving sudoku...");
     m_state.solverStep = SolverStep::Solving;
 
     std::stack<sudoku::algorithm::MatrixNode> nodes;
@@ -423,8 +422,8 @@ namespace pge {
     const sudoku::Board& b = (*m_board)();
     withSafetyNet(
       [&nodes, &b]() {
-        //sudoku::algorithm::SudokuMatrix solver;
-        sudoku::algorithm::SudokuMatrixV2 solver;
+        utils::ChronoMilliseconds c("Solving Sudoku", "solver");
+        sudoku::algorithm::SudokuMatrix solver;
         nodes = solver.solve(b);
       },
       "SudokuMatrix::solve"
