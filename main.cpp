@@ -13,6 +13,13 @@
 # include "TopViewFrame.hh"
 # include "App.hh"
 
+/// TODO: Not override the user-generated numbers when solving.
+/// TODO: Nice error message in case the solver fails.
+/// TODO: Solve button in main game.
+/// TODO: Generate random sudoku.
+/// TODO: Hint in main game.
+/// TODO: Problem with putting two fives in the center right.
+
 int
 main(int /*argc*/, char** /*argv*/) {
   // Create the logger.

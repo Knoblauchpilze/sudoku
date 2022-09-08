@@ -4,6 +4,87 @@
 # include <fstream>
 
 namespace sudoku {
+  namespace {
+
+    /// @brief - A convenience structure representing a digit
+    /// at a specific position.
+    struct DigitAt {
+      /// @brief - The value of the digit.
+      unsigned value;
+
+      /// @brief - The row in which the digit should be placed.
+      unsigned x;
+
+      /// @brief - The column in which the digit should be
+      /// placed.
+      unsigned y;
+
+      /// @brief - The width of the board.
+      unsigned width;
+
+      /// @brief - The height of the board.
+      unsigned height;
+    };
+
+    bool
+    canFitInColumn(const std::vector<unsigned>& board, const DigitAt& digit) noexcept {
+      if (digit.x >= 9 || digit.y >= 9) {
+        return false;
+      }
+
+      unsigned y = 0u;
+      while (y < 9u) {
+        if (board[y * digit.width + digit.x] == digit.value) {
+          return false;
+        }
+
+        ++y;
+      }
+
+      return true;
+    }
+
+    bool
+    canFitInRow(const std::vector<unsigned>& board, const DigitAt& digit) noexcept {
+      if (digit.x >= 9 || digit.y >= 9) {
+        return false;
+      }
+
+      unsigned x = 0u;
+      while (x < 9u) {
+        if (board[digit.y * digit.width + x] == digit.value) {
+          return false;
+        }
+
+        ++x;
+      }
+
+      return true;
+    }
+
+    bool
+    canFitInBox(const std::vector<unsigned>& board, const DigitAt& digit) noexcept {
+      if (digit.x >= 9 || digit.y >= 9) {
+        return false;
+      }
+
+      unsigned bx = digit.x / 3u;
+      unsigned by = digit.y / 3u;
+
+      unsigned p = 0u;
+      while (p < 9u) {
+        if (board[(3u * by + p / 3u) * digit.width + bx + p % 3u] == digit.value) {
+          return false;
+        }
+
+        ++p;
+      }
+
+      return true;
+    }
+
+  }
+
 
   Board::Board() noexcept:
     utils::CoreObject("board"),
@@ -56,7 +137,7 @@ namespace sudoku {
   }
 
   bool
-  Board::canFit(unsigned x, unsigned y, unsigned /*digit*/) const {
+  Board::canFit(unsigned x, unsigned y, unsigned digit) const {
     if (x >= m_width || y >= m_height) {
       error(
         "Failed to fetch digit status",
@@ -64,7 +145,32 @@ namespace sudoku {
       );
     }
 
-    /// TODO: Determine if a digit can fit.
+    DigitAt d{digit, x, y, m_width, m_height};
+
+    if (!canFitInColumn(m_board, d)) {
+      log(
+        "Digit " + std::to_string(digit) + " doesn't fit in column " + std::to_string(x),
+        utils::Level::Verbose
+      );
+      return false;
+    }
+
+    if (!canFitInRow(m_board, d)) {
+      log(
+        "Digit " + std::to_string(digit) + " doesn't fit in row " + std::to_string(y),
+        utils::Level::Verbose
+      );
+      return false;
+    }
+
+    if (!canFitInBox(m_board, d)) {
+      log(
+        "Digit " + std::to_string(digit) + " doesn't fit in box " + std::to_string(1u + x / 3u) + "x" + std::to_string(1u + y / 3u),
+        utils::Level::Verbose
+      );
+      return false;
+    }
+
     return true;
   }
 

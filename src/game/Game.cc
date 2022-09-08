@@ -231,7 +231,7 @@ namespace pge {
 
     unsigned tries = 0u;
     bool put = false;
-    while (tries < 9u && !put) {
+    while (tries < 10u && !put) {
       ++tries;
 
       if (m_hint.digit == 10u) {
