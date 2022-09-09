@@ -80,6 +80,10 @@ namespace pge {
         m_game->onDigitPressed(id);
       }
     }
+
+    if (c.keys[controls::keys::Del]) {
+      m_game->onDigitPressed(0u);
+    }
   }
 
   void

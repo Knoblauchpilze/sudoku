@@ -32,6 +32,8 @@ namespace pge {
         Eight,
         Nine,
 
+        Del,
+
         KeysCount
       };
 

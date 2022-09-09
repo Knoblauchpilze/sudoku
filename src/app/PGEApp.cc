@@ -202,6 +202,9 @@ namespace pge {
     b = GetKey(olc::S);
     m_controls.keys[controls::keys::S] = b.bReleased;
 
+    b = GetKey(olc::DEL);
+    m_controls.keys[controls::keys::Del] = b.bReleased;
+
     // Digits.
     b = GetKey(olc::K0);
     m_controls.keys[controls::keys::Zero] = b.bReleased;

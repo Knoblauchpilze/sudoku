@@ -77,7 +77,7 @@ namespace sudoku {
             const DigitKind& kind,
             ConstraintKind* reason)
   {
-    if (!m_board.canFit(x, y, digit, reason)) {
+    if (digit != 0u && !m_board.canFit(x, y, digit, reason)) {
       return false;
     }
 
