@@ -151,7 +151,7 @@ namespace pge {
 
     dims = olc::vi2d(50, STATUS_MENU_HEIGHT);
     for (unsigned id = 0u ; id < 9u ; ++id) {
-      std::string str = std::to_string(id);
+      std::string str = std::to_string(id + 1u);
       MenuShPtr d = generateMenu(pos, dims, str, "digit" + str, BUTTON_BG);
       d->setEnabled(false);
       m_hint.menus.push_back(d);
@@ -535,7 +535,7 @@ namespace pge {
       else {
         m.setVisible(true);
 
-        bool fit = b.canFit(m_hint.x, m_hint.y, id);
+        bool fit = b.canFit(m_hint.x, m_hint.y, id + 1u);
         m.setEnabled(fit);
         m.setBackground(menu::newColoredBackground(fit ? BUTTON_BG : DISABLED_BUTTON_BG));
       }
