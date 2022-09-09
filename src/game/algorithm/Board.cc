@@ -288,7 +288,7 @@ namespace sudoku {
         node.column(),
         node.row(),
         node.value(),
-        sudoku::DigitKind::Solved
+        sudoku::DigitKind::Generated
       );
     }
 

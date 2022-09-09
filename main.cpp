@@ -13,9 +13,8 @@
 # include "TopViewFrame.hh"
 # include "App.hh"
 
-/// TODO: Nice error message in case the solver fails.
-/// TODO: Solve button in main game.
 /// TODO: Hint in main game.
+/// TODO: End game when the sudoku is done.
 
 int
 main(int /*argc*/, char** /*argv*/) {

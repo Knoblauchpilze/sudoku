@@ -139,6 +139,14 @@ namespace pge {
     m_menus.digits[8u] = generateMenu(pos, dims, "9s: 9", "nines", BUTTON_BG);
     m_menus.status->addMenu(m_menus.digits[8u]);
 
+    MenuShPtr solve = generateMenu(pos, dims, "Solve", "solve", BUTTON_BG, true);
+    solve->setSimpleAction(
+      [](Game& g) {
+        g.solve();
+      }
+    );
+    m_menus.status->addMenu(solve);
+
     MenuShPtr reset = generateMenu(pos, dims, "Reset", "reset", BUTTON_BG, true);
     reset->setSimpleAction(
       [](Game& g) {
@@ -391,9 +399,7 @@ namespace pge {
     }
     else {
       // Reset the solver step.
-      if (m_state.mode == Mode::Solver) {
-        m_state.solverStep = SolverStep::Preparing;
-      }
+      m_state.solverStep = SolverStep::Preparing;
 
       // And update the digit of the active cell.
       m_hint.digit = digit;
@@ -409,10 +415,10 @@ namespace pge {
   void
   Game::solve() {
     // If we're in solving mode.
-    if (m_state.mode != Mode::Solver) {
-      warn("Ignoring solve request, not in solver mode");
-      return;
-    }
+    // if (m_state.mode != Mode::Solver) {
+    //   warn("Ignoring solve request, not in solver mode");
+    //   return;
+    // }
 
     // The solver step should allow solving the sudoku.
     if (m_state.solverStep == SolverStep::Solved) {
@@ -478,17 +484,11 @@ namespace pge {
     m_menus.hint->setVisible(m_state.mode == Mode::Interactive);
     m_menus.solve->setVisible(m_state.mode == Mode::Solver);
 
-    switch (m_state.mode) {
-      case Mode::Interactive:
-        updateUIForInteractive();
-        break;
-      case Mode::Solver:
-        updateUIForSolver();
-        break;
-      default:
-        warn("Invalid game mode " + std::to_string(static_cast<int>(m_state.mode)));
-        break;
+    if (m_state.mode ==  Mode::Interactive) {
+      updateUIForInteractive();
     }
+
+    updateUIForSolver();
   }
 
   void
