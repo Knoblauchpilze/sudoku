@@ -243,7 +243,15 @@ namespace pge {
         continue;
       }
 
-      if (!b.canFit(ux, uy, m_hint.digit)) {
+      sudoku::ConstraintKind reason;
+      if (!b.canFit(ux, uy, m_hint.digit, &reason)) {
+        log(
+          "Digit " + std::to_string(m_hint.digit) +
+          " doesn't fit at " + std::to_string(ux) + "x" + std::to_string(uy) +
+          " due to " + sudoku::toString(reason),
+          utils::Level::Verbose
+        );
+
         ++m_hint.digit;
         continue;
       }

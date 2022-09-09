@@ -74,9 +74,10 @@ namespace sudoku {
   Game::put(unsigned x,
             unsigned y,
             unsigned digit,
-            const DigitKind& kind)
+            const DigitKind& kind,
+            ConstraintKind* reason)
   {
-    if (!m_board.canFit(x, y, digit)) {
+    if (!m_board.canFit(x, y, digit, reason)) {
       return false;
     }
 

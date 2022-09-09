@@ -16,6 +16,18 @@ namespace sudoku {
     Solved,
   };
 
+  /// @brief - The type of constraint which failed when putting
+  /// a digit somewhere.
+  enum class ConstraintKind {
+    Row,
+    Column,
+    Box,
+    None
+  };
+
+  std::string
+  toString(const ConstraintKind& constraint) noexcept;
+
   class Board: public utils::CoreObject {
     public:
 
@@ -66,10 +78,14 @@ namespace sudoku {
        * @param x - the input coordinate.
        * @param y - the input coordinate.
        * @param digit - the digit to check.
+       * @param reason - the reason why the digit didn't fit.
        * @return - `true` if the input digit can fit.
        */
       bool
-      canFit(unsigned x, unsigned y, unsigned digit) const;
+      canFit(unsigned x,
+             unsigned y,
+             unsigned digit,
+             ConstraintKind* reason = nullptr) const;
 
       /**
        * @brief - Put a number at a certain spot.

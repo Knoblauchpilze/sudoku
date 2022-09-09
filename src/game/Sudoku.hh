@@ -82,13 +82,15 @@ namespace sudoku {
        * @param y - one of the coordinate where to put the digit.
        * @param digit - the digit to put.
        * @param kind - the kind of digit to put.
+       * @param reason - the reason why we couldn't put a digit.
        * @return - `true` if the digit could be put.
        */
       bool
       put(unsigned x,
           unsigned y,
           unsigned digit,
-          const DigitKind& kind);
+          const DigitKind& kind,
+          ConstraintKind* reason = nullptr);
 
     private:
 

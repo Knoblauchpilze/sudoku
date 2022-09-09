@@ -2,6 +2,7 @@
 # include "Board.hh"
 # include <cmath>
 # include <fstream>
+# include "Definitions.hh"
 
 namespace sudoku {
   namespace {
@@ -28,12 +29,12 @@ namespace sudoku {
 
     bool
     canFitInColumn(const std::vector<unsigned>& board, const DigitAt& digit) noexcept {
-      if (digit.x >= 9 || digit.y >= 9) {
+      if (digit.x >= counting::columnsCount || digit.y >= counting::rowsCount) {
         return false;
       }
 
       unsigned y = 0u;
-      while (y < 9u) {
+      while (y < counting::rowsCount) {
         if (board[y * digit.width + digit.x] == digit.value) {
           return false;
         }
@@ -46,12 +47,12 @@ namespace sudoku {
 
     bool
     canFitInRow(const std::vector<unsigned>& board, const DigitAt& digit) noexcept {
-      if (digit.x >= 9 || digit.y >= 9) {
+      if (digit.x >= counting::columnsCount || digit.y >= counting::rowsCount) {
         return false;
       }
 
       unsigned x = 0u;
-      while (x < 9u) {
+      while (x < counting::columnsCount) {
         if (board[digit.y * digit.width + x] == digit.value) {
           return false;
         }
@@ -64,16 +65,19 @@ namespace sudoku {
 
     bool
     canFitInBox(const std::vector<unsigned>& board, const DigitAt& digit) noexcept {
-      if (digit.x >= 9 || digit.y >= 9) {
+      if (digit.x >= counting::columnsCount || digit.y >= counting::rowsCount) {
         return false;
       }
 
-      unsigned bx = digit.x / 3u;
-      unsigned by = digit.y / 3u;
+      unsigned bx = digit.x / counting::boxesXCount;
+      unsigned by = digit.y / counting::boxesYCount;
 
       unsigned p = 0u;
-      while (p < 9u) {
-        if (board[(3u * by + p / 3u) * digit.width + bx + p % 3u] == digit.value) {
+      while (p < counting::boxCellsCount) {
+        unsigned yOffset = counting::boxYCellsCount * by + p / counting::boxYCellsCount;
+        unsigned xOffset = counting::boxXCellsCount * bx + p % counting::boxXCellsCount;
+
+        if (board[yOffset * digit.width + xOffset] == digit.value) {
           return false;
         }
 
@@ -85,6 +89,21 @@ namespace sudoku {
 
   }
 
+  std::string
+  toString(const ConstraintKind& constraint) noexcept {
+    switch (constraint) {
+      case ConstraintKind::Row:
+        return "row";
+      case ConstraintKind::Column:
+        return "column";
+      case ConstraintKind::Box:
+        return "box";
+      case ConstraintKind::None:
+        return "none";
+      default:
+        return "unknown";
+    }
+  }
 
   Board::Board() noexcept:
     utils::CoreObject("board"),
@@ -137,7 +156,11 @@ namespace sudoku {
   }
 
   bool
-  Board::canFit(unsigned x, unsigned y, unsigned digit) const {
+  Board::canFit(unsigned x,
+                unsigned y,
+                unsigned digit,
+                ConstraintKind* reason) const
+  {
     if (x >= m_width || y >= m_height) {
       error(
         "Failed to fetch digit status",
@@ -152,6 +175,11 @@ namespace sudoku {
         "Digit " + std::to_string(digit) + " doesn't fit in column " + std::to_string(x),
         utils::Level::Verbose
       );
+
+      if (reason != nullptr) {
+        *reason = ConstraintKind::Column;
+      }
+
       return false;
     }
 
@@ -160,6 +188,11 @@ namespace sudoku {
         "Digit " + std::to_string(digit) + " doesn't fit in row " + std::to_string(y),
         utils::Level::Verbose
       );
+
+      if (reason != nullptr) {
+        *reason = ConstraintKind::Row;
+      }
+
       return false;
     }
 
@@ -168,7 +201,16 @@ namespace sudoku {
         "Digit " + std::to_string(digit) + " doesn't fit in box " + std::to_string(1u + x / 3u) + "x" + std::to_string(1u + y / 3u),
         utils::Level::Verbose
       );
+
+      if (reason != nullptr) {
+        *reason = ConstraintKind::Box;
+      }
+
       return false;
+    }
+
+    if (reason != nullptr) {
+      *reason = ConstraintKind::None;
     }
 
     return true;
