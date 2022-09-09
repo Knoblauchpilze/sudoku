@@ -15,7 +15,6 @@
 
 /// TODO: Nice error message in case the solver fails.
 /// TODO: Solve button in main game.
-/// TODO: Generate random sudoku.
 /// TODO: Hint in main game.
 
 int

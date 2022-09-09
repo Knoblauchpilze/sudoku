@@ -403,6 +403,7 @@ namespace pge {
   void
   Game::setDifficultyLevel(const sudoku::Level& level) {
     m_board = std::make_shared<sudoku::Game>(level);
+    m_board->initialize();
   }
 
   void

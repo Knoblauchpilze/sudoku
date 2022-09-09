@@ -17,6 +17,9 @@ namespace sudoku::algorithm {
       std::stack<MatrixNode>
       solve(const Board& board);
 
+      bool
+      solvable(const Board& board);
+
     private:
 
       /// @brief - A partial step for the solution.

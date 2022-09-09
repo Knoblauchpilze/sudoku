@@ -2,7 +2,10 @@
 # include "Board.hh"
 # include <cmath>
 # include <fstream>
+# include <core_utils/RNG.hh>
 # include "Definitions.hh"
+# include "Definitions.hh"
+# include "SudokuMatrix.hh"
 
 namespace sudoku {
   namespace {
@@ -247,21 +250,91 @@ namespace sudoku {
 
   bool
   Board::generate(unsigned digits) noexcept {
-    /// TODO: Generate a valid sudoku.
-    warn("Should generate game with " + std::to_string(digits) + " digit(s)");
-
-    unsigned id = 0u;
-    while (id < digits) {
-      unsigned x = std::rand() % 9u;
-      unsigned y = std::rand() % 9u;
-
-      m_board[linear(x, y)] = 1u + std::rand() % 9u;
-      m_kinds[linear(x, y)] = DigitKind::Generated;
-
-      ++id;
+    if (digits > counting::cellsCount) {
+      return false;
     }
 
-    return false;
+    utils::RNG rng;
+
+    // Put a random digit somewhere to initialize the
+    // board. This will prevent identical sudokus to
+    // be generated.
+    unsigned digit = rng.rndInt(1, counting::candidates);
+    unsigned x = rng.rndInt(0u, counting::columnsCount - 1u);
+    unsigned y = rng.rndInt(0u, counting::rowsCount - 1u);
+
+    log(
+      "Starting with seed " + std::to_string(digit) + " at " +
+      std::to_string(x) + "x" + std::to_string(y)
+    );
+
+    m_board[y * m_width + x] = digit;
+
+    // Solve the sudoku.
+    std::stack<sudoku::algorithm::MatrixNode> nodes;
+    sudoku::algorithm::SudokuMatrix solver;
+    nodes = solver.solve(*this);
+
+    if (nodes.empty()) {
+      error("Failed to generate sudoku");
+    }
+
+    // Fill the board.
+    while (!nodes.empty()) {
+      sudoku::algorithm::MatrixNode node = nodes.top();
+      nodes.pop();
+
+      put(
+        node.column(),
+        node.row(),
+        node.value(),
+        sudoku::DigitKind::Solved
+      );
+    }
+
+    // Now remove digits randomly until we reach the amount
+    // of digits we want to keep.
+    unsigned toRemove = counting::cellsCount - digits;
+    unsigned removed = 0u;
+
+    unsigned failures = 0u;
+    unsigned totalFailures = 0u;
+    // A large amount representing how many failures we can
+    // tolerate when generating the sudoku.
+    constexpr auto maxFailues = 81;
+
+    while (removed < toRemove && failures <= maxFailues) {
+      unsigned x = rng.rndInt(0u, counting::columnsCount - 1u);
+      unsigned y = rng.rndInt(0u, counting::rowsCount - 1u);
+
+      // Remove the digit.
+      DigitKind kind;
+      digit = at(x, y, &kind);
+
+      put(x, y, 0u, DigitKind::None);
+
+      // Check if the sudoku is still solvable.
+      sudoku::algorithm::SudokuMatrix solver;
+      if (solver.solvable(*this)) {
+        ++removed;
+        // Reset the failures.
+        log("Generated digit " + std::to_string(digit) + " after " + std::to_string(failures) + " failure(s)");
+        failures = 0u;
+      }
+      else {
+        // Restore the digit.
+        put(x, y, digit, kind);
+        ++failures;
+        ++totalFailures;
+      }
+    }
+
+    info(
+      "Generated sudoku with " + std::to_string(digits) +
+      " after " + std::to_string(totalFailures) + " failure(s)"
+    );
+
+    return true;
   }
 
   void

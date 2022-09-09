@@ -187,7 +187,8 @@ namespace sudoku::algorithm {
     log(
       "Adding digit " + std::to_string(step.value) + " at " +
        std::to_string(step.column + 1) + "x" + std::to_string(step.row + 1) +
-       " as step " + std::to_string(steps.size() + 1)
+       " as step " + std::to_string(steps.size() + 1),
+       utils::Level::Verbose
     );
 
     rows.erase(rowToDelete);
@@ -252,6 +253,11 @@ namespace sudoku::algorithm {
     info("Puzzle solved successfully!");
 
     return helper.buildSolution();
+  }
+
+  bool
+  SudokuMatrix::solvable(const Board& board) {
+    return !solve(board).empty();
   }
 
   void

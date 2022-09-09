@@ -1,5 +1,6 @@
 
 # include "Sudoku.hh"
+# include <core_utils/Chrono.hh>
 
 namespace {
 
@@ -28,8 +29,6 @@ namespace sudoku {
     m_level(level)
   {
     setService("sudoku");
-
-    initialize();
   }
 
   unsigned
@@ -57,7 +56,19 @@ namespace sudoku {
     // Reset the board and generate it with a certain
     // amount of numbers visible still.
     m_board.reset();
-    m_board.generate(levelToNumbers(m_level));
+
+    bool generated = false;
+    withSafetyNet(
+      [this, &generated]() {
+        utils::ChronoMilliseconds c("Solving Sudoku", "solver");
+        generated = m_board.generate(levelToNumbers(m_level));
+      },
+      "Board::generate"
+    );
+
+    if (!generated) {
+      error("Failed to generate sudoku");
+    }
   }
 
   void
