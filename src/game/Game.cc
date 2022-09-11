@@ -70,6 +70,11 @@ namespace {
   const auto BUTTON_BG = olc::Pixel(185, 172, 159);
   const auto DISABLED_BUTTON_BG = olc::Pixel(92, 86, 78);
 
+  constexpr auto solverModeSolvedAlert = "Solved !";
+  constexpr auto solverModeUnsolvableAlert = "Unsolvable !";
+
+  constexpr auto interactiveModeSolvedAlert = "You solved the sudoku !";
+  constexpr auto interactiveModeUnsolvableAlert = "There's probably a mistake !";
 }
 
 namespace pge {
@@ -181,7 +186,7 @@ namespace pge {
     m_menus.solvedAlert.menu = generateMessageBoxMenu(
       olc::vi2d((width - 300.0f) / 2.0f, (height - 150.0f) / 2.0f),
       olc::vi2d(300, 150),
-      "Solved !",
+      solverModeSolvedAlert,
       "solved_alert",
       false
     );
@@ -194,7 +199,7 @@ namespace pge {
     m_menus.unsolvableAlert.menu = generateMessageBoxMenu(
       olc::vi2d((width - 300.0f) / 2.0f, (height - 150.0f) / 2.0f),
       olc::vi2d(300, 150),
-      "Unsolvable !",
+      solverModeUnsolvableAlert,
       "unsolvable_alert",
       true
     );
@@ -317,6 +322,18 @@ namespace pge {
   Game::setMode(const Mode& mode) noexcept {
     m_state.mode = mode;
     m_state.solverStep = (mode == Mode::Interactive ? SolverStep::None : SolverStep::Preparing);
+
+    // Update the texts of the alerts.
+    m_menus.solvedAlert.menu->setText(
+      mode == Mode::Interactive ?
+      interactiveModeSolvedAlert :
+      solverModeSolvedAlert
+    );
+    m_menus.unsolvableAlert.menu->setText(
+      mode == Mode::Interactive ?
+      interactiveModeUnsolvableAlert :
+      solverModeUnsolvableAlert
+    );
   }
 
   void
