@@ -13,6 +13,13 @@ namespace pge {
   }
 
   inline
+  void
+  Game::finish() noexcept {
+    info("Game has been finished");
+    m_state.done = true;
+  }
+
+  inline
   bool
   Game::terminated() const noexcept {
     return m_state.terminated;

@@ -180,6 +180,14 @@ namespace pge {
       }
     );
 
+
+    m_menus.back = generateMenu(olc::vi2d(0, height - STATUS_MENU_HEIGHT), olc::vi2d(width, STATUS_MENU_HEIGHT), "Back", "back", olc::VERY_DARK_BIDOOF, true);
+    m_menus.back->setSimpleAction(
+      [this](Game& g) {
+        g.finish();
+      }
+    );
+
     m_menus.solvedAlert.date = utils::TimeStamp();
     m_menus.solvedAlert.wasActive = false;
     m_menus.solvedAlert.duration = ALERT_DURATION_MS;
@@ -211,6 +219,7 @@ namespace pge {
 
     menus.push_back(m_menus.status);
     menus.push_back(m_menus.solve);
+    menus.push_back(m_menus.back);
 
     menus.push_back(m_menus.hint);
 
@@ -527,6 +536,7 @@ namespace pge {
     m_menus.status->setVisible(m_state.mode == Mode::Interactive);
     m_menus.hint->setVisible(m_state.mode == Mode::Interactive);
     m_menus.solve->setVisible(m_state.mode == Mode::Solver);
+    m_menus.back->setVisible(m_state.mode == Mode::Solver);
 
     if (m_state.mode ==  Mode::Interactive) {
       updateUIForInteractive();

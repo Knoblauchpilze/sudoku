@@ -72,6 +72,14 @@ namespace pge {
       terminate() noexcept;
 
       /**
+       * @brief - Requests the game to be finished. This is applied
+       *          to the next iteration of the game loop and can be
+       *          used to trigger a 'back-to-main-menu' operation.
+       */
+      void
+      finish() noexcept;
+
+      /**
        * @brief - Returns whether or not the game has been
        *          terminated. The game is terminated when
        *          the user wants to exit the app (usually).
@@ -316,6 +324,10 @@ namespace pge {
 
         // The solve button for the solver mode.
         MenuShPtr solve;
+
+        // The back button to return to the mode selection from
+        // the solver mode.
+        MenuShPtr back;
 
         // The alert menu indicating that the sudoku was solved.
         TimedMenu solvedAlert;
