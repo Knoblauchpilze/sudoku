@@ -58,9 +58,10 @@ namespace pge {
        *            action should be taking place.
        * @param y - the ordinate of the position at which the
        *            action will be taking place.
+       * @param erase - `true` if the action is an erase action.
        */
       void
-      performAction(float x, float y);
+      performAction(float x, float y, bool erase);
 
       /**
        * @brief - Requests the game to be terminated. This is

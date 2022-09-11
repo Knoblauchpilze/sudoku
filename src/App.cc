@@ -62,7 +62,15 @@ namespace pge {
       olc::vf2d it;
       olc::vi2d tp = cf.pixelCoordsToTiles(olc::vi2d(c.mPosX, c.mPosY), &it);
 
-      m_game->performAction(tp.x + it.x, tp.y + it.y);
+      m_game->performAction(tp.x + it.x, tp.y + it.y, false);
+    }
+    bool rClick = (c.buttons[controls::mouse::Right] == controls::ButtonState::Released);
+    if (rClick && !relevant) {
+      olc::vf2d it;
+      olc::vf2d tp = cf.pixelCoordsToTiles(olc::vi2d(c.mPosX, c.mPosY), &it);
+
+      m_game->onDigitPressed(0u);
+      m_game->performAction(tp.x + it.x, tp.y + it.y, true);
     }
 
     if (c.keys[controls::keys::P]) {

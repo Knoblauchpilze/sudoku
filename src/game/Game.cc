@@ -220,7 +220,7 @@ namespace pge {
   }
 
   void
-  Game::performAction(float x, float y) {
+  Game::performAction(float x, float y, bool erase) {
     // Only handle actions when the game is not disabled.
     if (m_state.disabled) {
       log("Ignoring action while menu is disabled");
@@ -238,17 +238,26 @@ namespace pge {
     unsigned ux = static_cast<unsigned>(ix);
     unsigned uy = static_cast<unsigned>(iy);
 
-    // Loop until we can put a valid number in the current
-    // cell of the board.
     const sudoku::Board& b = (*m_board)();
 
+    // In erase mode, just try to remove the current digit.
+    if (erase) {
+      if (!m_board->put(ux, uy, 0u, sudoku::DigitKind::None)) {
+        warn("Failed to erase digit at " + std::to_string(ux) + "x" + std::to_string(uy));
+      }
+
+      return;
+    }
+
+    // Loop until we can put a valid number in the current
+    // cell of the board.
     unsigned tries = 0u;
     bool put = false;
     while (tries < 10u && !put) {
       ++tries;
 
       if (m_hint.digit == 10u) {
-        m_hint.digit = 0u;
+        m_hint.digit = 1u;
       }
 
       if (b.at(ux, uy) == m_hint.digit) {
@@ -262,7 +271,7 @@ namespace pge {
           "Digit " + std::to_string(m_hint.digit) +
           " doesn't fit at " + std::to_string(ux) + "x" + std::to_string(uy) +
           " due to " + sudoku::toString(reason),
-          utils::Level::Verbose
+          utils::Level::Debug
         );
 
         ++m_hint.digit;
@@ -282,9 +291,7 @@ namespace pge {
       put = true;
 
       // Reset the solver step.
-      if (m_state.mode == Mode::Solver) {
-        m_state.solverStep = SolverStep::Preparing;
-      }
+      m_state.solverStep = SolverStep::Preparing;
     }
   }
 
