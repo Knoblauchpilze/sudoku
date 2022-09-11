@@ -89,6 +89,7 @@ namespace pge {
         false,             // terminated
         Mode::Solver,      // mode
         SolverStep::None,  // solverStep
+        false,             // done
       }
     ),
 
@@ -307,14 +308,20 @@ namespace pge {
       m_hint.active = true;
     }
 
-    /// TODO: Handle step method of the game.
     updateUI();
 
-    return true;
+    // Disable UI in case the game is done.
+    if (m_state.done) {
+      pause();
+      enable(!m_state.paused);
+    }
+
+    return !m_state.done;
   }
 
   void
   Game::togglePause() {
+    log("huhu");
     if (m_state.paused) {
       resume();
     }
@@ -341,6 +348,16 @@ namespace pge {
       interactiveModeUnsolvableAlert :
       solverModeUnsolvableAlert
     );
+
+    // Prevent the game from being done from the start.
+    m_state.done = false;
+
+    // Unpause the game in case of the solver mode as
+    // it is not done by the difficulty level method.
+    if (mode == Mode::Solver) {
+      resume();
+      enable(!m_state.paused);
+    }
   }
 
   void
@@ -434,6 +451,9 @@ namespace pge {
   Game::setDifficultyLevel(const sudoku::Level& level) {
     m_board = std::make_shared<sudoku::Game>(level);
     m_board->initialize();
+
+    resume();
+    enable(!m_state.paused);
   }
 
   void
@@ -568,8 +588,17 @@ namespace pge {
 
   void
   Game::updateUIForSolver() {
-    m_menus.solvedAlert.update(m_state.solverStep == SolverStep::Solved);
+    bool alertStillOn = m_menus.solvedAlert.update(m_state.solverStep == SolverStep::Solved);
     m_menus.unsolvableAlert.update(m_state.solverStep == SolverStep::Unsolvable);
+
+    if (m_state.mode == Mode::Interactive &&
+        m_state.solverStep == SolverStep::Solved &&
+        !alertStillOn)
+    {
+    log("hihi");
+      // The sudoku is solved and the menu is done.
+      m_state.done = true;
+    }
   }
 
   bool

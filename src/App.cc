@@ -23,7 +23,7 @@ namespace pge {
     }
 
     if (!m_game->step(fElapsed)) {
-      info("This is game over");
+      m_state->setScreen(pge::Screen::Home);
     }
 
     return m_game->terminated();
@@ -98,7 +98,6 @@ namespace pge {
   App::loadData() {
     // Create the game and its state.
     m_game = std::make_shared<Game>();
-    m_game->togglePause();
   }
 
   void

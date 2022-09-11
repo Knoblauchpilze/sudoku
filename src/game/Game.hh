@@ -297,6 +297,9 @@ namespace pge {
         // The current solver step. Only relevant in case the
         // general mode of the game is set to `Solver`.
         SolverStep solverStep;
+
+        // Whether or not the game has been finished.
+        bool done;
       };
 
       /// @brief - Convenience structure allowing to regroup
