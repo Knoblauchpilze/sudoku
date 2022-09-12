@@ -361,12 +361,8 @@ namespace pge {
     // Prevent the game from being done from the start.
     m_state.done = false;
 
-    // Unpause the game in case of the solver mode as
-    // it is not done by the difficulty level method.
-    if (mode == Mode::Solver) {
-      resume();
-      enable(!m_state.paused);
-    }
+    resume();
+    enable(!m_state.paused);
   }
 
   void

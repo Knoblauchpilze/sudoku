@@ -14,7 +14,6 @@
 # include "App.hh"
 
 /// TODO: Hint in main game.
-/// TODO: Generate a solver/play mode after loading and set unpause there.
 
 int
 main(int /*argc*/, char** /*argv*/) {

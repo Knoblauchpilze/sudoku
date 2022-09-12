@@ -74,6 +74,8 @@ namespace pge {
     m_modeSelector(nullptr),
     m_difficultySelector(nullptr),
     m_loadGame(nullptr),
+    m_gameToLoad(),
+    m_loadGameModeSelector(nullptr),
     m_savedGames(10u, "data/saves", "ext"),
     m_gameOver(nullptr),
 
@@ -85,6 +87,7 @@ namespace pge {
     generateModeSelectorScreen(dims);
     generateDifficultySelectorScreen(dims);
     generateLoadGameScreen(dims);
+    generateLoadGameSelectorScreen(dims);
     generateGameOverScreen(dims);
 
     // Assign the screen, which will handle the visibility
@@ -118,6 +121,7 @@ namespace pge {
     m_modeSelector->setVisible(m_screen == Screen::ModeSelector);
     m_difficultySelector->setVisible(m_screen == Screen::DifficultySelector);
     m_loadGame->setVisible(m_screen == Screen::LoadGame);
+    m_loadGameModeSelector->setVisible(m_screen == Screen::LoadGameSelector);
     m_gameOver->setVisible(m_screen == Screen::GameOver);
   }
 
@@ -127,6 +131,7 @@ namespace pge {
     m_modeSelector->render(pge);
     m_difficultySelector->render(pge);
     m_loadGame->render(pge);
+    m_loadGameModeSelector->render(pge);
     m_gameOver->render(pge);
   }
 
@@ -153,6 +158,10 @@ namespace pge {
     res.relevant = (res.relevant || cur.relevant);
     res.selected = (res.selected || cur.selected);
 
+    cur = m_loadGameModeSelector->processUserInput(c, actions);
+    res.relevant = (res.relevant || cur.relevant);
+    res.selected = (res.selected || cur.selected);
+
     cur = m_gameOver->processUserInput(c, actions);
     res.relevant = (res.relevant || cur.relevant);
     res.selected = (res.selected || cur.selected);
@@ -169,8 +178,8 @@ namespace pge {
   GameState::onSavedGamePicked(const std::string& game) {
     info("Picked saved game \"" + game + "\"");
 
-    m_game.load(game);
-    setScreen(Screen::Game);
+    m_gameToLoad = game;
+    setScreen(Screen::LoadGameSelector);
   }
 
   void
@@ -294,6 +303,41 @@ namespace pge {
 
     m_savedGames.generate(m_loadGame);
     m_savedGames.refresh();
+  }
+
+  void
+  GameState::generateLoadGameSelectorScreen(const olc::vi2d& dims) {
+    // Generate the mode selection screen.
+    m_loadGameModeSelector = generateDefaultScreen(dims, olc::DARK_COBALT_BLUE);
+
+    // Add each option to the screen.
+    MenuShPtr m = generateScreenOption(dims, "Play", olc::VERY_DARK_COBALT_BLUE, "play", true);
+    m->setSimpleAction(
+      [this](Game& g) {
+        g.setMode(Mode::Interactive);
+
+        std::string game = m_gameToLoad;
+        m_gameToLoad.clear();
+        m_game.load(game);
+
+        setScreen(Screen::Game);
+      }
+    );
+    m_loadGameModeSelector->addMenu(m);
+
+    m = generateScreenOption(dims, "Solver", olc::VERY_DARK_COBALT_BLUE, "solver", true);
+    m->setSimpleAction(
+      [this](Game& g) {
+        g.setMode(Mode::Solver);
+
+        std::string game = m_gameToLoad;
+        m_gameToLoad.clear();
+        m_game.load(game);
+
+        setScreen(Screen::Game);
+      }
+    );
+    m_loadGameModeSelector->addMenu(m);
   }
 
   void

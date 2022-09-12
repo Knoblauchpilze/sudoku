@@ -16,6 +16,7 @@ namespace pge {
     Home,
     ModeSelector,
     DifficultySelector,
+    LoadGameSelector,
     LoadGame,
     Game,
     GameOver,
@@ -113,6 +114,9 @@ namespace pge {
       generateLoadGameScreen(const olc::vi2d& dims);
 
       void
+      generateLoadGameSelectorScreen(const olc::vi2d& dims);
+
+      void
       generateGameOverScreen(const olc::vi2d& dims);
 
     private:
@@ -147,6 +151,18 @@ namespace pge {
        *          on the loading game screen.
        */
       MenuShPtr m_loadGame;
+
+      /**
+       * @brief - If not empty the string corresponding to the game
+       *          to load.
+       */
+      std::string m_gameToLoad;
+
+      /**
+       * @brief - Defines the screen to display when the game is
+       *          on picking a mode for the loading of a game.
+       */
+      MenuShPtr m_loadGameModeSelector;
 
       /**
        * @brief - The data needed to represent the list of games
