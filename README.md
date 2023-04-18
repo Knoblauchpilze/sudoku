@@ -70,7 +70,7 @@ Each interaction is filtered by the app and only performed if it is possible. Fo
 
 This means that if the user presses `8` on the numeric keypad, nothing will happen. Similarly, if the user left clicks on the mouse in any cell in the box, the `8` value will be skipped.
 
-We don't detect 'complex' invalid numbers, just the ones which can easily be detected as invalid because of existing digits. The number which will be possible to place in a cell are exactly the ones which would appear in the main game view as a hint (see [here](###bottom-banner).
+We don't detect 'complex' invalid numbers, just the ones which can easily be detected as invalid because of existing digits. The number which will be possible to place in a cell are exactly the ones which would appear in the main game view as a hint (see [here](#bottom-banner)).
 
 ## Controlling the grid
 
