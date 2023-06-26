@@ -131,4 +131,4 @@ When the solver fails, an alert is displayed like so:
 
 ![Unsolvable alert](resources/unsolvable_alert.png)
 
-Not that the user can always come back to the main screen using the back button at the bottom of the screen.
+Note that the user can always come back to the main screen using the back button at the bottom of the screen.
