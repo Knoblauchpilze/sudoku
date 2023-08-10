@@ -142,6 +142,8 @@ private:
    */
   mutable std::vector<DigitKind> m_kinds;
 
+  int m_digits{0};
+
   bool m_solved{false};
 };
 

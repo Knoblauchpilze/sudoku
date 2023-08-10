@@ -109,10 +109,7 @@ std::string toString(const ConstraintKind &constraint) noexcept {
 }
 
 Board::Board() noexcept
-    : utils::CoreObject("board"),
-
-      m_width(9u), m_height(9u),
-
+    : utils::CoreObject("board"), m_width(9u), m_height(9u),
       m_board(w() * h(), 0u), m_kinds(w() * h(), DigitKind::None) {
   setService("sudoku");
 }
@@ -210,14 +207,20 @@ void Board::put(unsigned x, unsigned y, unsigned digit, const DigitKind &kind) {
   m_board[linear(x, y)] = digit;
   m_kinds[linear(x, y)] = (digit == 0u ? DigitKind::None : kind);
 
-  // Update the solved status.
-  algorithm::SudokuMatrix solver;
-  m_solved = solver.solvable(*this);
+  m_digits += (digit == 0u ? -1 : 1);
+
+  // Update the solved status if all digits are filled.*
+  m_solved = false;
+  if (m_digits == static_cast<int>(w() * h())) {
+    algorithm::SudokuMatrix solver;
+    m_solved = solver.solvable(*this);
+  }
 }
 
 void Board::reset() noexcept {
   m_board = std::vector<unsigned>(w() * h(), 0u);
   m_kinds = std::vector<DigitKind>(w() * h(), DigitKind::None);
+  m_digits = 0;
 }
 
 bool Board::generate(unsigned digits) noexcept {
@@ -296,6 +299,8 @@ bool Board::generate(unsigned digits) noexcept {
   info("Generated sudoku with " + std::to_string(digits) + " after " +
        std::to_string(totalFailures) + " failure(s)");
 
+  m_digits = static_cast<int>(digits);
+
   return true;
 }
 
@@ -363,6 +368,18 @@ void Board::load(const std::string &file) {
 
   info("Loaded board with dimensions " + std::to_string(m_width) + "x" +
        std::to_string(m_height));
+
+  m_digits = 0;
+  for (unsigned id = 0u; id < m_board.size(); ++id) {
+    if (m_board[id] != 0u) {
+      ++m_digits;
+    }
+  }
+
+  if (m_digits == static_cast<int>(w() * h())) {
+    algorithm::SudokuMatrix solver;
+    m_solved = solver.solvable(*this);
+  }
 }
 
 inline unsigned Board::linear(unsigned x, unsigned y) const noexcept {

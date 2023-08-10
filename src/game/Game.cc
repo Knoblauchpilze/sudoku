@@ -333,6 +333,11 @@ const sudoku::Board &Game::board() const noexcept { return (*m_board)(); }
 void Game::load(const std::string &file) {
   // Load the board.
   m_board->load(file);
+
+  if (m_board->solved()) {
+    log("Board is now solved");
+    m_state.solverStep = SolverStep::Solved;
+  }
 }
 
 void Game::save(const std::string &file) const {
