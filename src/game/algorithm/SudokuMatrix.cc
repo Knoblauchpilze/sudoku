@@ -128,13 +128,13 @@ namespace sudoku::algorithm {
       }
 
       if (ones < minOnes) {
-        log("Found better constraint " + std::to_string(column + 1) + " only satisfied " + std::to_string(ones) + " time(s)", utils::Level::Verbose);
+        verbose("Found better constraint " + std::to_string(column + 1) + " only satisfied " + std::to_string(ones) + " time(s)");
         minOnes = ones;
         best = column;
       }
     }
 
-    log("Best column is " + std::to_string(best + 1) + " only satisfied " + std::to_string(minOnes) + " time(s)", utils::Level::Verbose);
+    verbose("Best column is " + std::to_string(best + 1) + " only satisfied " + std::to_string(minOnes) + " time(s)");
 
     return best;
   }
@@ -143,7 +143,7 @@ namespace sudoku::algorithm {
   SudokuMatrix::Solver::chooseRow(const std::vector<int>& matrix, int column) const {
     for (auto row : rows) {
       if (matrix[row * counting::constraints + column] == 1) {
-        log("Picked row " + std::to_string(row + 1) + ", first satisfying constraint " + std::to_string(column + 1), utils::Level::Verbose);
+        verbose("Picked row " + std::to_string(row + 1) + ", first satisfying constraint " + std::to_string(column + 1));
 
         return row;
       }
@@ -184,11 +184,10 @@ namespace sudoku::algorithm {
       error("Cannot hide row " + std::to_string(rowToDelete) + ", failed to build solution step from it");
     }
     steps.push_back(step);
-    log(
+    verbose(
       "Adding digit " + std::to_string(step.value) + " at " +
        std::to_string(step.column + 1) + "x" + std::to_string(step.row + 1) +
-       " as step " + std::to_string(steps.size() + 1),
-       utils::Level::Verbose
+       " as step " + std::to_string(steps.size() + 1)
     );
 
     rows.erase(rowToDelete);
@@ -205,12 +204,12 @@ namespace sudoku::algorithm {
           continue;
         }
 
-        log("Deleting row " + std::to_string(row + 1) + " sharing column " + std::to_string(column + 1) + " with row " + std::to_string(rowToDelete + 1), utils::Level::Verbose);
+        verbose("Deleting row " + std::to_string(row + 1) + " sharing column " + std::to_string(column + 1) + " with row " + std::to_string(rowToDelete + 1));
 
         rows.erase(row);
       }
 
-      log("Deleting column " + std::to_string(column + 1) + " as constraint is staisfied", utils::Level::Verbose);
+      verbose("Deleting column " + std::to_string(column + 1) + " as constraint is staisfied");
 
       columns.erase(column);
     }
@@ -332,11 +331,10 @@ namespace sudoku::algorithm {
           );
         }
 
-        log(
+        verbose(
           "Initial board has a " + std::to_string(value) +
           " at " + std::to_string(column + 1) + "x" + std::to_string(row + 1) +
-          " covering row " + std::to_string(rowToCover),
-          utils::Level::Verbose
+          " covering row " + std::to_string(rowToCover)
         );
 
         helper.cover(rowToCover, m_matrix);
@@ -362,7 +360,7 @@ namespace sudoku::algorithm {
       error("Failed to pick a row while " + std::to_string(helper.rows.size()) + " are available");
     }
 
-    log("Picked constraint " + std::to_string(column + 1) + "x" + std::to_string(row + 1), utils::Level::Verbose);
+    verbose("Picked constraint " + std::to_string(column + 1) + "x" + std::to_string(row + 1));
 
     helper.cover(row, m_matrix);
 

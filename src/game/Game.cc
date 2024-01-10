@@ -188,7 +188,7 @@ std::vector<MenuShPtr> Game::generateMenus(float width, float height) {
 void Game::performAction(float x, float y, bool erase) {
   // Only handle actions when the game is not disabled.
   if (m_state.disabled) {
-    log("Ignoring action while menu is disabled");
+    debug("Ignoring action while menu is disabled");
     return;
   }
 
@@ -239,10 +239,9 @@ void Game::performAction(float x, float y, bool erase) {
 
     sudoku::ConstraintKind reason;
     if (!b.canFit(ux, uy, m_hint.digit, &reason)) {
-      log("Digit " + std::to_string(m_hint.digit) + " doesn't fit at " +
+      debug("Digit " + std::to_string(m_hint.digit) + " doesn't fit at " +
               std::to_string(ux) + "x" + std::to_string(uy) + " due to " +
-              sudoku::toString(reason),
-          utils::Level::Debug);
+              sudoku::toString(reason));
 
       ++m_hint.digit;
       continue;
@@ -253,7 +252,7 @@ void Game::performAction(float x, float y, bool erase) {
       continue;
     }
 
-    log("Put " + std::to_string(m_hint.digit) + " at " + std::to_string(ux) +
+    debug("Put " + std::to_string(m_hint.digit) + " at " + std::to_string(ux) +
         "x" + std::to_string(uy));
 
     put = true;
@@ -291,7 +290,6 @@ bool Game::step(float /*tDelta*/) {
 }
 
 void Game::togglePause() {
-  log("huhu");
   if (m_state.paused) {
     resume();
   } else {
@@ -335,7 +333,7 @@ void Game::load(const std::string &file) {
   m_board->load(file);
 
   if (m_board->solved()) {
-    log("Board is now solved");
+    debug("Board is now solved");
     m_state.solverStep = SolverStep::Solved;
   }
 }
@@ -413,7 +411,7 @@ void Game::onDigitPressed(unsigned digit) {
   }
 
   if (m_board->solved()) {
-    log("Board is now solved");
+    debug("Board is now solved");
     m_state.solverStep = SolverStep::Solved;
   }
 }
@@ -476,9 +474,9 @@ void Game::enable(bool enable) {
   m_state.disabled = !enable;
 
   if (m_state.disabled) {
-    log("Disabled game UI", utils::Level::Verbose);
+    verbose("Disabled game UI");
   } else {
-    log("Enabled game UI", utils::Level::Verbose);
+    verbose("Enabled game UI");
   }
 }
 

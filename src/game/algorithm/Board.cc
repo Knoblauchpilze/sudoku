@@ -152,9 +152,8 @@ bool Board::canFit(unsigned x, unsigned y, unsigned digit,
   DigitAt d{digit, x, y, m_width, m_height};
 
   if (!canFitInColumn(m_board, d)) {
-    log("Digit " + std::to_string(digit) + " doesn't fit in column " +
-            std::to_string(x),
-        utils::Level::Verbose);
+    verbose("Digit " + std::to_string(digit) + " doesn't fit in column " +
+            std::to_string(x));
 
     if (reason != nullptr) {
       *reason = ConstraintKind::Column;
@@ -164,9 +163,8 @@ bool Board::canFit(unsigned x, unsigned y, unsigned digit,
   }
 
   if (!canFitInRow(m_board, d)) {
-    log("Digit " + std::to_string(digit) + " doesn't fit in row " +
-            std::to_string(y),
-        utils::Level::Verbose);
+    verbose("Digit " + std::to_string(digit) + " doesn't fit in row " +
+            std::to_string(y));
 
     if (reason != nullptr) {
       *reason = ConstraintKind::Row;
@@ -176,9 +174,8 @@ bool Board::canFit(unsigned x, unsigned y, unsigned digit,
   }
 
   if (!canFitInBox(m_board, d)) {
-    log("Digit " + std::to_string(digit) + " doesn't fit in box " +
-            std::to_string(1u + x / 3u) + "x" + std::to_string(1u + y / 3u),
-        utils::Level::Verbose);
+    verbose("Digit " + std::to_string(digit) + " doesn't fit in box " +
+            std::to_string(1u + x / 3u) + "x" + std::to_string(1u + y / 3u));
 
     if (reason != nullptr) {
       *reason = ConstraintKind::Box;
@@ -237,7 +234,7 @@ bool Board::generate(unsigned digits) noexcept {
   unsigned x = rng.rndInt(0u, counting::columnsCount - 1u);
   unsigned y = rng.rndInt(0u, counting::rowsCount - 1u);
 
-  log("Starting with seed " + std::to_string(digit) + " at " +
+  debug("Starting with seed " + std::to_string(digit) + " at " +
       std::to_string(x) + "x" + std::to_string(y));
 
   m_board[y * m_width + x] = digit;
@@ -285,7 +282,7 @@ bool Board::generate(unsigned digits) noexcept {
     if (solver.solvable(*this)) {
       ++removed;
       // Reset the failures.
-      log("Generated digit " + std::to_string(digit) + " after " +
+      debug("Generated digit " + std::to_string(digit) + " after " +
           std::to_string(failures) + " failure(s)");
       failures = 0u;
     } else {
